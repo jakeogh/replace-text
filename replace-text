@@ -4,8 +4,6 @@
 
 # example: replace 'c1:12345:respawn:/sbin/agetty 38400 tty1 linux' 'c1:12345:respawn:/sbin/agetty 38400 tty1 linux --noclear' /etc/inittab
 
-
-
 import sys
 import time
 import shutil
@@ -28,17 +26,17 @@ if len(match) == 0:
 	print("You must specify text to match. Exiting.")
 	exit(1)
 
-if file != None:
+if file is not None:
 
 	file_to_modify = sys.argv[3]
 	file_to_modify_basename = os.path.basename(file_to_modify)
 	file_to_modify_dir = os.path.dirname(file_to_modify)
-	
+
 	temp_file_name_suffix = '-' + file_to_modify_basename + '.tmp'
 
 	temp_file = tempfile.NamedTemporaryFile(mode='w', suffix=temp_file_name_suffix, prefix='tmp-', dir=file_to_modify_dir, delete=False)
-	
-	with open(file_to_modify,'rU') as file_to_modify_fh:
+
+	with open(file_to_modify, 'rU') as file_to_modify_fh:
 		for line in file_to_modify_fh:
 			newline = line.replace(match, replacement).rstrip()
 
@@ -53,7 +51,7 @@ if file != None:
 
 		temp_file_name = temp_file.name
 		temp_file.close()
-		shutil.copystat(file_to_modify, temp_file_name)	#make the metadata of the temp file match the original file in prep to overwrite the orig file.
+		shutil.copystat(file_to_modify, temp_file_name)
 		shutil.move(temp_file_name, file_to_modify)
 
 else:
