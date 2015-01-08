@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+
+# Replace the given text in a file or stdin. Easier to use than sed because you dont need to escape text.
+
+# example: replace 'c1:12345:respawn:/sbin/agetty 38400 tty1 linux' 'c1:12345:respawn:/sbin/agetty 38400 tty1 linux --noclear' /etc/inittab
+
+
+
+import sys
+import time
+import shutil
+import tempfile
+import os
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("match", help='the string to match')
+parser.add_argument("replacement", help='the string to replace the match with')
+parser.add_argument("file", help='optional file to parse', default=None, nargs='?')
+
+args = parser.parse_args()
+
+match = args.match
+replacement = args.replacement
+file = args.file
+
+if len(match) == 0:
+	print("You must specify text to match. Exiting.")
+	exit(1)
+
+if file != None:
+
+	file_to_modify = sys.argv[3]
+	file_to_modify_basename = os.path.basename(file_to_modify)
+	file_to_modify_dir = os.path.dirname(file_to_modify)
+	
+	temp_file_name_suffix = '-' + file_to_modify_basename + '.tmp'
+
+	temp_file = tempfile.NamedTemporaryFile(mode='w', suffix=temp_file_name_suffix, prefix='tmp-', dir=file_to_modify_dir, delete=False)
+	
+	with open(file_to_modify,'rU') as file_to_modify_fh:
+		for line in file_to_modify_fh:
+			newline = line.replace(match, replacement).rstrip()
+
+			if file_to_modify_fh.newlines == '\n':
+				temp_file.write("%s\n" % newline)
+				continue
+			elif file_to_modify_fh.newlines == '\r\n':
+				temp_file.write("%s\r\n" % newline)
+				continue
+			elif file_to_modify_fh.newlines == '\r':
+				temp_file.write("%s\r" % newline)
+
+		temp_file_name = temp_file.name
+		temp_file.close()
+		shutil.copystat(file_to_modify, temp_file_name)	#make the metadata of the temp file match the original file in prep to overwrite the orig file.
+		shutil.move(temp_file_name, file_to_modify)
+
+else:
+
+	for line in sys.stdin:
+		print(line.replace(match, replacement), end='')
