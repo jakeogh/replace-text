@@ -34,7 +34,11 @@ if file is not None:
 
 	temp_file_name_suffix = '-' + file_to_modify_basename + '.tmp'
 
-	temp_file = tempfile.NamedTemporaryFile(mode='w', suffix=temp_file_name_suffix, prefix='tmp-', dir=file_to_modify_dir, delete=False)
+	temp_file = tempfile.NamedTemporaryFile(mode='w',
+						suffix=temp_file_name_suffix,
+						prefix='tmp-',
+						dir=file_to_modify_dir,
+						delete=False)
 
 	with open(file_to_modify, 'rU') as file_to_modify_fh:
 		for line in file_to_modify_fh:
