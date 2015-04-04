@@ -2,7 +2,8 @@
 
 # Replace the given text in a file or stdin. Easier to use than sed because you dont need to escape text.
 
-# example: replace 'c1:12345:respawn:/sbin/agetty 38400 tty1 linux' 'c1:12345:respawn:/sbin/agetty 38400 tty1 linux --noclear' /etc/inittab
+# example:
+# $replace 'c1:12345:respawn:/sbin/agetty 38400 tty1 linux' 'c1:12345:respawn:/sbin/agetty 38400 tty1 linux --noclear' /etc/inittab
 
 import sys
 import time
