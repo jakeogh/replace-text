@@ -43,13 +43,13 @@ if file is not None:
 		for line in file_to_modify_fh:
 			newline = line.replace(match, replacement).rstrip()
 
-			if file_to_modify_fh.newlines == '\n':
+			if file_to_modify_fh.newlines == '\n':		# LF (Unix)
 				temp_file.write("%s\n" % newline)
 				continue
-			elif file_to_modify_fh.newlines == '\r\n':
+			elif file_to_modify_fh.newlines == '\r\n':	# CR+LF (DOS/Windows)
 				temp_file.write("%s\r\n" % newline)
 				continue
-			elif file_to_modify_fh.newlines == '\r':
+			elif file_to_modify_fh.newlines == '\r':	# CR (Mac OS <= version 9)
 				temp_file.write("%s\r" % newline)
 
 		temp_file_name = temp_file.name
