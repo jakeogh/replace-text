@@ -14,7 +14,7 @@ Example:
 $ replace-text 'c1:12345:respawn:/sbin/agetty 38400 tty1 linux' \
                'c1:12345:respawn:/sbin/agetty 38400 tty1 linux --noclear' /etc/inittab
 
-$./replace-text -h
+$ replace-text -h
 usage: replace-text [-h] match replacement [file]
 
 positional arguments:
