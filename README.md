@@ -6,7 +6,7 @@ Replace the given text in a file or stdin.
 
 * No need to escape text.
 * Handles arbitrary large files and/or stdin/stdout.
-* Perserves existing [line endings](https://en.wikipedia.org/wiki/Newline) LF Unix/OSX, CR+LF DOS/Windows and CR Mac OS <= version 9).
+* Perserves existing [line endings](https://en.wikipedia.org/wiki/Newline) LF Unix/OSX, CR+LF DOS/Windows and CR Mac OS <= version 9.
 * Perserves [file metadata](https://docs.python.org/3/library/shutil.html#shutil.copystat).
 
 Example:
