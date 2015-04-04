@@ -11,8 +11,19 @@ Replace the given text in a file or stdin.
 
 Example:
 ```
-$ replace 'c1:12345:respawn:/sbin/agetty 38400 tty1 linux' \
-	  'c1:12345:respawn:/sbin/agetty 38400 tty1 linux --noclear' /etc/inittab
+$ replace-text 'c1:12345:respawn:/sbin/agetty 38400 tty1 linux' \
+	       'c1:12345:respawn:/sbin/agetty 38400 tty1 linux --noclear' /etc/inittab
+
+$./replace-text -h
+usage: replace-text [-h] match replacement [file]
+
+positional arguments:
+  match        the string to match
+  replacement  the string to replace the match with
+  file         optional file to parse
+
+optional arguments:
+  -h, --help   show this help message and exit
 ```
 
 Tip: Use [strong quoting](http://wiki.bash-hackers.org/syntax/quoting).
