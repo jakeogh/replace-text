@@ -2,12 +2,12 @@
 """
 replace-text - Replace text in files(s) or stdin.
 """
+import re
+from setuptools import find_packages, setup
 import sys
 if not sys.version_info[0] == 3:
     sys.exit("Sorry, Python 3 is required. Use: \'python3 setup.py install\'")
 
-import re
-from setuptools import find_packages, setup
 dependencies = []
 version = 0.01
 
@@ -27,7 +27,7 @@ setup(
     install_requires=dependencies,
     entry_points={
         'console_scripts': [
-            'replace-text = replace-text.replace-text:replace_text',
+            'replace-text = replace_text.replace_text:replace_text',
         ],
     },
     classifiers=[
