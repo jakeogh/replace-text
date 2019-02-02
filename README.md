@@ -15,12 +15,12 @@ $ replace-text 'c1:12345:respawn:/sbin/agetty 38400 tty1 linux' \
                'c1:12345:respawn:/sbin/agetty 38400 tty1 linux --noclear' /etc/inittab
 
 $ replace-text -h
-usage: replace-text [-h] match replacement [file]
+usage: replace-text [-h] match replacement [files]
 
 positional arguments:
   match        the string to match
   replacement  the string to replace the match with
-  file         optional file to parse
+  files        optional file(s) to parse
 
 optional arguments:
   -h, --help   show this help message and exit
