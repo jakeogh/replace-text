@@ -9,6 +9,7 @@ import tempfile
 import os
 
 
+@click.command()
 @click.argument("match", nargs=1)
 @click.argument("replacement", nargs=1)
 @click.argument("files", nargs=-1, required=False)
