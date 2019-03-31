@@ -36,9 +36,11 @@ def all_files_iter(p):
 
 
 def modify_file(file_to_modify, match, replacement):
+    if isinstance(file_to_modify, str):
+        file_to_modify = file_to_modify.encode('utf8')
     file_to_modify_basename = os.path.basename(file_to_modify)
     file_to_modify_dir = os.path.dirname(file_to_modify)
-    temp_file_name_suffix = '-' + file_to_modify_basename + '.tmp'
+    temp_file_name_suffix = b'-' + file_to_modify_basename + b'.tmp'
     temp_file = tempfile.NamedTemporaryFile(mode='w',
                                             suffix=temp_file_name_suffix,
                                             prefix='tmp-',
