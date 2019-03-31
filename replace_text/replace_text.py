@@ -7,6 +7,7 @@ import sys
 import shutil
 import tempfile
 import os
+import stat
 from pathlib import Path
 
 
