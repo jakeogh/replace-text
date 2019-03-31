@@ -77,7 +77,7 @@ def replace_text(match, replacement, files, recursive):
             print(line.replace(match, replacement), end='')
 
     for file_to_modify in files:
-        if os.path.isdir(file_to_modify)
+        if os.path.isdir(file_to_modify):
             if not recursive:
                 print(file_to_modify, "is a folder, you must specify --recursive. Exiting with no changes.")
 
