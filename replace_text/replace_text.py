@@ -43,7 +43,7 @@ def modify_file(file_to_modify, match, replacement):
     temp_file_name_suffix = b'-' + file_to_modify_basename + b'.tmp'
     temp_file = tempfile.NamedTemporaryFile(mode='w',
                                             suffix=temp_file_name_suffix,
-                                            prefix='tmp-',
+                                            prefix=b'tmp-',
                                             dir=file_to_modify_dir,
                                             delete=False)
 
