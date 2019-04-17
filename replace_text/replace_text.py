@@ -60,7 +60,7 @@ def modify_file(file_to_modify, match, replacement):
                 elif file_to_modify_fh.newlines == '\r':    # CR (Mac OS <= v9)
                     temp_file.write("%s\r" % new_line)
         except UnicodeDecodeError as e:
-            print("UnicodeDecodeError:", file_to_modify)
+            print("UnicodeDecodeError:", file_to_modify, file=sys.stderr)
             raise e
 
         temp_file_name = temp_file.name
@@ -82,7 +82,7 @@ def replace_text(match, replacement, files, recursive):
     for file_to_modify in files:
         if os.path.isdir(file_to_modify):
             if not recursive:
-                print(file_to_modify, "is a folder, you must specify --recursive. Exiting with no changes.")
+                print("Warning: skipping folder:", file_to_modify, "specify --recursive to decend into it.", file=sys.stderr)
 
     for file_to_modify in files:
         if os.path.isdir(file_to_modify):
