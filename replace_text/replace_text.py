@@ -83,6 +83,7 @@ def replace_text(match, replacement, files, recursive):
         if os.path.isdir(file_to_modify):
             if not recursive:
                 print("Warning: skipping folder:", file_to_modify, "specify --recursive to decend into it.", file=sys.stderr)
+                files.remove(file_to_modify)
 
     for file_to_modify in files:
         if os.path.isdir(file_to_modify):
