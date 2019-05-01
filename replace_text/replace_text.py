@@ -72,12 +72,14 @@ def modify_file(file_to_modify, match, replacement):
 @click.command()
 @click.argument("match", nargs=1)
 @click.argument("replacement", nargs=1)
-@click.argument("files", nargs=-1, required=False, type=list)
+@click.argument("files", nargs=-1, required=False)
 @click.option('--recursive', '-r', is_flag=True)
 def replace_text(match, replacement, files, recursive):
     if not files:
         for line in sys.stdin:
             print(line.replace(match, replacement), end='')
+
+    files = list(files)
 
     for file_to_modify in files:
         if os.path.isdir(file_to_modify):
