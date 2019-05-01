@@ -72,7 +72,7 @@ def modify_file(file_to_modify, match, replacement):
 @click.command()
 @click.argument("match", nargs=1)
 @click.argument("replacement", nargs=1)
-@click.argument("files", nargs=-1, required=False)
+@click.argument("files", nargs=-1, required=False, type=list)
 @click.option('--recursive', '-r', is_flag=True)
 def replace_text(match, replacement, files, recursive):
     if not files:
