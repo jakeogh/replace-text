@@ -86,20 +86,24 @@ def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbo
 
     files = list(files)
 
+#    for file_to_modify in files:
+#        if os.path.isdir(file_to_modify):
+#            if not recursive:
+#                print("Warning: skipping folder:", file_to_modify, "specify --recursive to decend into it.", file=sys.stderr)
+#                files.remove(file_to_modify)
+#            if file_to_modify not in ['.', '..']:  #bug filenames are bytes
+#                if file_to_modify.startswith('.'):
+#                    if not recursive_dotfiles:
+#                        print("Warning: skipping folder:", file_to_modify, "specify --recursive-dotfiles to decend into it.", file=sys.stderr)
+#                        files.remove(file_to_modify)
+
+
     for file_to_modify in files:
         if os.path.isdir(file_to_modify):
             if not recursive:
                 print("Warning: skipping folder:", file_to_modify, "specify --recursive to decend into it.", file=sys.stderr)
-                files.remove(file_to_modify)
-            if file_to_modify not in ['.', '..']:  #bug filenames are bytes
-                if file_to_modify.startswith('.'):
-                    if not recursive_dotfiles:
-                        print("Warning: skipping folder:", file_to_modify, "specify --recursive-dotfiles to decend into it.", file=sys.stderr)
-                        files.remove(file_to_modify)
+                continue
 
-
-    for file_to_modify in files:
-        if os.path.isdir(file_to_modify):
             for sub_file in all_files_iter(file_to_modify):
                 if is_regular_file(sub_file):
                     modify_file(file_to_modify=sub_file, match=match, replacement=replacement, verbose=verbose)
