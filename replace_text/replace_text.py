@@ -74,7 +74,8 @@ def modify_file(file_to_modify, match, replacement):
 @click.argument("replacement", nargs=1)
 @click.argument("files", nargs=-1, required=False)
 @click.option('--recursive', '-r', is_flag=True)
-def replace_text(match, replacement, files, recursive):
+@click.option('--recursive-dotfiles', '-d', is_flag=True)
+def replace_text(match, replacement, files, recursive, recursive_dotfiles):
     if not files:
         for line in sys.stdin:
             print(line.replace(match, replacement), end='')
@@ -86,6 +87,11 @@ def replace_text(match, replacement, files, recursive):
             if not recursive:
                 print("Warning: skipping folder:", file_to_modify, "specify --recursive to decend into it.", file=sys.stderr)
                 files.remove(file_to_modify)
+            if file_to_modify.startswith('.'):
+                if not recursive_dotfiles:
+                    print("Warning: skipping folder:", file_to_modify, "specify --recursive-dotfiles to decend into it.", file=sys.stderr)
+                    files.remove(file_to_modify)
+
 
     for file_to_modify in files:
         if os.path.isdir(file_to_modify):
