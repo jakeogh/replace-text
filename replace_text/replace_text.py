@@ -35,7 +35,10 @@ def all_files_iter(p):
             yield bytes(sub.absolute())
 
 
-def modify_file(file_to_modify, match, replacement):
+def modify_file(file_to_modify, match, replacement, verbose):
+    if verbose:
+        print(file_to_modify, file=sys.stderr)
+
     if isinstance(file_to_modify, str):
         file_to_modify = file_to_modify.encode('utf8')
     file_to_modify_basename = os.path.basename(file_to_modify)
@@ -75,7 +78,8 @@ def modify_file(file_to_modify, match, replacement):
 @click.argument("files", nargs=-1, required=False)
 @click.option('--recursive', '-r', is_flag=True)
 @click.option('--recursive-dotfiles', '-d', is_flag=True)
-def replace_text(match, replacement, files, recursive, recursive_dotfiles):
+@click.option('--verbose', '-v', is_flag=True)
+def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbose):
     if not files:
         for line in sys.stdin:
             print(line.replace(match, replacement), end='')
@@ -87,20 +91,21 @@ def replace_text(match, replacement, files, recursive, recursive_dotfiles):
             if not recursive:
                 print("Warning: skipping folder:", file_to_modify, "specify --recursive to decend into it.", file=sys.stderr)
                 files.remove(file_to_modify)
-            if file_to_modify.startswith('.'):
-                if not recursive_dotfiles:
-                    print("Warning: skipping folder:", file_to_modify, "specify --recursive-dotfiles to decend into it.", file=sys.stderr)
-                    files.remove(file_to_modify)
+            if file_to_modify not in ['.', '..']:  #bug filenames are bytes
+                if file_to_modify.startswith('.'):
+                    if not recursive_dotfiles:
+                        print("Warning: skipping folder:", file_to_modify, "specify --recursive-dotfiles to decend into it.", file=sys.stderr)
+                        files.remove(file_to_modify)
 
 
     for file_to_modify in files:
         if os.path.isdir(file_to_modify):
             for sub_file in all_files_iter(file_to_modify):
                 if is_regular_file(sub_file):
-                    modify_file(file_to_modify=sub_file, match=match, replacement=replacement)
+                    modify_file(file_to_modify=sub_file, match=match, replacement=replacement, verbose=verbose)
         else:
             if is_regular_file(file_to_modify):
-                modify_file(file_to_modify=file_to_modify, match=match, replacement=replacement)
+                modify_file(file_to_modify=file_to_modify, match=match, replacement=replacement, verbose=verbose)
 
 
 if __name__ == '__main__':
