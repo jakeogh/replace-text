@@ -84,7 +84,7 @@ def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbo
     if match:
         if not replacement:
             print("you provided one argument, assuming it is a path")
-            files = match
+            files = [match]
     else:
         if not ask:
             print("you must specify --ask if a match and replacement is not provided on the command line")
