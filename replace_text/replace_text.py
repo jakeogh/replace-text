@@ -79,12 +79,16 @@ def modify_file(file_to_modify, match, replacement, verbose):
 @click.option('--recursive', '-r', is_flag=True)
 @click.option('--recursive-dotfiles', '-d', is_flag=True)
 @click.option('--verbose', '-v', is_flag=True)
-#@click.option('--ask', is_flag=True, help="escape from shell escaping")
+@click.option('--ask', is_flag=True, help="escape from shell escaping")
 def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbose, ask):
     if match:
-        assert replacement
+        if not replacement:
+            print("you provided one argument, assuming it is a path")
+            files = match
     else:
-        #assert ask
+        if not ask:
+            print("you must specify --ask if a match and replacement is not provided on the command line")
+            quit(1)
         match = input("match: ")
         replacement = input("replacement: ")
     if not files:
