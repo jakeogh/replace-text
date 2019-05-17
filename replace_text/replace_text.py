@@ -73,30 +73,25 @@ def modify_file(file_to_modify, match, replacement, verbose):
 
 
 @click.command()
-@click.argument("match", nargs=1)
-@click.argument("replacement", nargs=1)
+@click.argument("match", nargs=1, required=False)
+@click.argument("replacement", nargs=1, required=False)
 @click.argument("files", nargs=-1, required=False)
 @click.option('--recursive', '-r', is_flag=True)
 @click.option('--recursive-dotfiles', '-d', is_flag=True)
 @click.option('--verbose', '-v', is_flag=True)
-def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbose):
+@click.option('--ask', is_flag=True, help="escape from shell escaping")
+def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbose, ask):
+    if match:
+        assert replacement
+    else:
+        assert ask
+        match = input("match: ")
+        replacement = input("replacement: ")
     if not files:
         for line in sys.stdin:
             print(line.replace(match, replacement), end='')
 
     files = list(files)
-
-#    for file_to_modify in files:
-#        if os.path.isdir(file_to_modify):
-#            if not recursive:
-#                print("Warning: skipping folder:", file_to_modify, "specify --recursive to decend into it.", file=sys.stderr)
-#                files.remove(file_to_modify)
-#            if file_to_modify not in ['.', '..']:  #bug filenames are bytes
-#                if file_to_modify.startswith('.'):
-#                    if not recursive_dotfiles:
-#                        print("Warning: skipping folder:", file_to_modify, "specify --recursive-dotfiles to decend into it.", file=sys.stderr)
-#                        files.remove(file_to_modify)
-
 
     for file_to_modify in files:
         if os.path.isdir(file_to_modify):
