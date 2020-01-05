@@ -25,29 +25,29 @@ def all_files_iter(p):
     elif isinstance(p, bytes):
         p = Path(p.decode())
     assert isinstance(p, Path)
-    yield bytes(p.absolute())
+    yield p.absolute()
     for sub in p.iterdir():
         # eprint("sub:", sub)  # todo: read by terminal, so bell etc happens.... eprint bug?
         if sub.is_symlink():  # must be before is_dir()
-            yield bytes(sub.absolute())
+            yield sub.absolute()
         elif sub.is_dir():
             yield from all_files_iter(sub)
         else:
-            yield bytes(sub.absolute())
+            yield sub.absolute()
 
 
 def modify_file(file_to_modify, match, replacement, verbose):
     if verbose:
         print(file_to_modify, file=sys.stderr)
 
-    if isinstance(file_to_modify, str):
-        file_to_modify = file_to_modify.encode('utf8')
+    #if isinstance(file_to_modify, str):
+    #    file_to_modify = file_to_modify.encode('utf8')
     file_to_modify_basename = os.path.basename(file_to_modify)
     file_to_modify_dir = os.path.dirname(file_to_modify)
-    temp_file_name_suffix = b'-' + file_to_modify_basename + b'.tmp'
+    temp_file_name_suffix = '-' + file_to_modify_basename + '.tmp'
     temp_file = tempfile.NamedTemporaryFile(mode='w',
                                             suffix=temp_file_name_suffix,
-                                            prefix=b'tmp-',
+                                            prefix='tmp-',
                                             dir=file_to_modify_dir,
                                             delete=False)
 
