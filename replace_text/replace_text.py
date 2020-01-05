@@ -9,6 +9,7 @@ import tempfile
 import os
 import stat
 from pathlib import Path
+from kcl.printops import eprint
 
 
 def is_regular_file(path):
@@ -110,6 +111,10 @@ def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbo
 
             for sub_file in all_files_iter(file_to_modify):
                 if is_regular_file(sub_file):
+                    if '.' in sub_file.parent:
+                        if not recursive_dotfiles:
+                            eprint("skipping:", sub_file, "due to dot '.' in parent")
+                            continue
                     modify_file(file_to_modify=sub_file, match=match, replacement=replacement, verbose=verbose)
         else:
             if is_regular_file(file_to_modify):
