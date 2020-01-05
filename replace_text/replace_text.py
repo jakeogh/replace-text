@@ -106,7 +106,9 @@ def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbo
     for file_to_modify in files:
         if os.path.isdir(file_to_modify):
             if not recursive:
-                print("Warning: skipping folder:", file_to_modify, "specify --recursive to decend into it.", file=sys.stderr)
+                print("Warning: skipping folder:",
+                       file_to_modify,
+                       "specify --recursive to decend into it.", file=sys.stderr)
                 continue
 
             for sub_file in all_files_iter(file_to_modify):
