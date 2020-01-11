@@ -115,7 +115,8 @@ def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbo
                 if is_regular_file(sub_file):
                     if '.' in os.fsdecode(sub_file.parent):
                         if not recursive_dotfiles:
-                            eprint("skipping:", sub_file, "due to dot '.' in parent")
+                            if verbose:
+                                eprint("skipping:", sub_file, "due to dot '.' in parent")
                             continue
                     modify_file(file_to_modify=sub_file, match=match, replacement=replacement, verbose=verbose)
         else:
