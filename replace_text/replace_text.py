@@ -9,7 +9,18 @@ import tempfile
 import os
 import stat
 from pathlib import Path
-from kcl.printops import eprint
+from colorama import Fore
+from colorama import Style
+
+
+def eprint(*args, **kwargs):
+    print(Fore.GREEN, file=sys.stderr, end='')
+    if 'end' in kwargs.keys():
+        print(*args, file=sys.stderr, **kwargs)
+        print(Style.RESET_ALL, file=sys.stderr, end='')
+    else:
+        print(*args, file=sys.stderr, **kwargs, end='')
+        print(Style.RESET_ALL, file=sys.stderr)
 
 
 def is_regular_file(path):
