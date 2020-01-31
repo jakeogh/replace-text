@@ -76,7 +76,7 @@ def modify_file(file_to_modify, match, replacement, verbose):
                     temp_file.write("%s\r" % new_line)
         except UnicodeDecodeError as e:
             print("UnicodeDecodeError:", file_to_modify, file=sys.stderr)
-            raise e
+            print(e)
 
         temp_file_name = temp_file.name
         temp_file.close()
