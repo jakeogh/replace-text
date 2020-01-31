@@ -76,7 +76,7 @@ def modify_file(file_to_modify, match, replacement, verbose):
                     temp_file.write("%s\r" % new_line)
         except UnicodeDecodeError as e:
             print("UnicodeDecodeError:", file_to_modify, file=sys.stderr)
-            print(e)
+            raise e
 
         temp_file_name = temp_file.name
         temp_file.close()
@@ -129,10 +129,16 @@ def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbo
                             if verbose:
                                 eprint("skipping:", sub_file, "due to dot '.' in parent")
                             continue
-                    modify_file(file_to_modify=sub_file, match=match, replacement=replacement, verbose=verbose)
+                    try:
+                        modify_file(file_to_modify=sub_file, match=match, replacement=replacement, verbose=verbose)
+                    except UnicodeDecodeError:
+                        pass
         else:
             if is_regular_file(file_to_modify):
-                modify_file(file_to_modify=file_to_modify, match=match, replacement=replacement, verbose=verbose)
+                try:
+                    modify_file(file_to_modify=file_to_modify, match=match, replacement=replacement, verbose=verbose)
+                except UnicodeDecodeError:
+                    pass
 
 
 if __name__ == '__main__':
