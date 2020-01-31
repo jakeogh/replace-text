@@ -55,9 +55,9 @@ def modify_file(file_to_modify, match, replacement, verbose):
     #    file_to_modify = file_to_modify.encode('utf8')
     file_to_modify_basename = os.path.basename(file_to_modify)
     file_to_modify_dir = os.path.dirname(file_to_modify)
-    temp_file_name_suffix = '-' + file_to_modify_basename + '.tmp'
+    #temp_file_name_suffix = '-' + file_to_modify_basename + '.tmp'
+                                            #suffix=temp_file_name_suffix,
     temp_file = tempfile.NamedTemporaryFile(mode='w',
-                                            suffix=temp_file_name_suffix,
                                             prefix='tmp-',
                                             dir=file_to_modify_dir,
                                             delete=False)
