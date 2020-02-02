@@ -47,7 +47,7 @@ def all_files_iter(p):
             yield sub.absolute()
 
 
-def modify_file(file_to_modify, match, replacement, verbose):
+def modify_file_broken(file_to_modify, match, replacement, verbose):
     if verbose:
         print(file_to_modify, file=sys.stderr)
 
@@ -62,10 +62,11 @@ def modify_file(file_to_modify, match, replacement, verbose):
                                             dir=file_to_modify_dir,
                                             delete=False)
 
+    assert(False)
     with open(file_to_modify, 'rU') as file_to_modify_fh:
         try:
             for line in file_to_modify_fh:
-                new_line = line.replace(match, replacement).rstrip()
+                new_line = line.replace(match, replacement).rstrip()  #OOPS. this strips whitespace on the right. that's bad.
                 if file_to_modify_fh.newlines == '\n':      # LF (Unix)
                     temp_file.write("%s\n" % new_line)
                     continue
