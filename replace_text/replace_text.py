@@ -11,6 +11,7 @@ import stat
 from pathlib import Path
 from colorama import Fore
 from colorama import Style
+from icecream import ic
 
 
 def eprint(*args, **kwargs):
@@ -47,9 +48,9 @@ def all_files_iter(p):
             yield sub.absolute()
 
 
-def modify_file_broken(file_to_modify, match, replacement, verbose):
+def modify_file(file_to_modify, match, replacement, verbose):
     if verbose:
-        print(file_to_modify, file=sys.stderr)
+        ic(file_to_modify)
 
     #if isinstance(file_to_modify, str):
     #    file_to_modify = file_to_modify.encode('utf8')
@@ -62,11 +63,14 @@ def modify_file_broken(file_to_modify, match, replacement, verbose):
                                             dir=file_to_modify_dir,
                                             delete=False)
 
-    assert(False)
+    # this cant handle binary files... or files with mixed newlines
+    modified = False
     with open(file_to_modify, 'rU') as file_to_modify_fh:
         try:
             for line in file_to_modify_fh:
-                new_line = line.replace(match, replacement).rstrip()  #OOPS. this strips whitespace on the right. that's bad.
+                if match in line:
+                    modified = True
+                new_line = line.replace(match, replacement)
                 if file_to_modify_fh.newlines == '\n':      # LF (Unix)
                     temp_file.write("%s\n" % new_line)
                     continue
@@ -81,9 +85,11 @@ def modify_file_broken(file_to_modify, match, replacement, verbose):
 
         temp_file_name = temp_file.name
         temp_file.close()
-        shutil.copystat(file_to_modify, temp_file_name)
-        shutil.move(temp_file_name, file_to_modify)
-
+        if modified:
+            shutil.copystat(file_to_modify, temp_file_name)
+            shutil.move(temp_file_name, file_to_modify)
+        else:
+            os.unlink(temp_file_name)
 
 @click.command()
 @click.argument("match", nargs=1, required=False)
