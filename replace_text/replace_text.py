@@ -2,7 +2,6 @@
 '''
 # Replace the given text in file(s) or stdin.
 '''
-import click
 import sys
 import shutil
 import tempfile
@@ -12,6 +11,7 @@ from pathlib import Path
 from colorama import Fore
 from colorama import Style
 from icecream import ic
+import click
 
 
 def eprint(*args, **kwargs):
