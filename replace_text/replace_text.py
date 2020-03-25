@@ -68,19 +68,18 @@ def modify_file(file_to_modify, match, replacement, verbose):
     with open(file_to_modify, 'rU') as file_to_modify_fh:
         try:
             for line in file_to_modify_fh:
-                ic(line)
-                quit(1)
                 if match in line:
                     modified = True
                 new_line = line.replace(match, replacement)
-                if file_to_modify_fh.newlines == '\n':      # LF (Unix)
-                    temp_file.write("%s\n" % new_line)
-                    continue
-                elif file_to_modify_fh.newlines == '\r\n':  # CR+LF (DOS/Win)
-                    temp_file.write("%s\r\n" % new_line)
-                    continue
-                elif file_to_modify_fh.newlines == '\r':    # CR (Mac OS <= v9)
-                    temp_file.write("%s\r" % new_line)
+                temp_file.write(new_line)
+                #if file_to_modify_fh.newlines == '\n':      # LF (Unix)
+                #    temp_file.write("%s\n" % new_line)
+                #    continue
+                #elif file_to_modify_fh.newlines == '\r\n':  # CR+LF (DOS/Win)
+                #    temp_file.write("%s\r\n" % new_line)
+                #    continue
+                #elif file_to_modify_fh.newlines == '\r':    # CR (Mac OS <= v9)
+                #    temp_file.write("%s\r" % new_line)
         except UnicodeDecodeError as e:
             print("UnicodeDecodeError:", file_to_modify, file=sys.stderr)
             raise e
