@@ -68,6 +68,8 @@ def modify_file(file_to_modify, match, replacement, verbose):
     with open(file_to_modify, 'rU') as file_to_modify_fh:
         try:
             for line in file_to_modify_fh:
+                ic(line)
+                quit(1)
                 if match in line:
                     modified = True
                 new_line = line.replace(match, replacement)
