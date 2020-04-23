@@ -10,8 +10,9 @@ import stat
 from pathlib import Path
 from colorama import Fore
 from colorama import Style
-from icecream import ic
+#from icecream import ic  # too many deps
 import click
+#note adding deps requires changes to sendgentoo
 
 
 def eprint(*args, **kwargs):
@@ -50,7 +51,7 @@ def all_files_iter(p):
 
 def modify_file(file_to_modify, match, replacement, verbose):
     if verbose:
-        ic(file_to_modify)
+        eprint(file_to_modify)
 
     #if isinstance(file_to_modify, str):
     #    file_to_modify = file_to_modify.encode('utf8')
