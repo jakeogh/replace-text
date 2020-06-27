@@ -108,13 +108,13 @@ def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbo
             files = [match]
             if not ask:
                 print("you must specify --ask if a match and replacement is not provided on the command line", file=sys.stderr)
-                quit(1)
+                sys.exit(1)
             match = input("match: ")
             replacement = input("replacement: ")
     else:
         if not ask:
             print("you must specify --ask if a match and replacement is not provided on the command line", file=sys.stderr)
-            quit(1)
+            sys.exit(1)
         match = input("match: ")
         replacement = input("replacement: ")
     if not files:
