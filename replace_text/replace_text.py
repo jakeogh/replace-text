@@ -127,8 +127,8 @@ def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbo
         if os.path.isdir(file_to_modify):
             if not recursive:
                 print("Warning: skipping folder:",
-                       file_to_modify,
-                       "specify --recursive to decend into it.", file=sys.stderr)
+                      file_to_modify,
+                      "specify --recursive to decend into it.", file=sys.stderr)
                 continue
 
             for sub_file in all_files_iter(file_to_modify):
@@ -148,7 +148,3 @@ def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbo
                     modify_file(file_to_modify=file_to_modify, match=match, replacement=replacement, verbose=verbose)
                 except UnicodeDecodeError:
                     pass
-
-
-#if __name__ == '__main__':
-#    replace_text()
