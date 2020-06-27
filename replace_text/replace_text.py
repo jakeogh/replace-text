@@ -104,16 +104,16 @@ def modify_file(file_to_modify, match, replacement, verbose):
 def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbose, ask):
     if match:
         if not replacement:
-            print("you provided one argument, assuming it is a path")
+            print("you provided one argument, assuming it is a path", file=sys.stderr)
             files = [match]
             if not ask:
-                print("you must specify --ask if a match and replacement is not provided on the command line")
+                print("you must specify --ask if a match and replacement is not provided on the command line", file=sys.stderr)
                 quit(1)
             match = input("match: ")
             replacement = input("replacement: ")
     else:
         if not ask:
-            print("you must specify --ask if a match and replacement is not provided on the command line")
+            print("you must specify --ask if a match and replacement is not provided on the command line", file=sys.stderr)
             quit(1)
         match = input("match: ")
         replacement = input("replacement: ")
@@ -150,5 +150,5 @@ def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbo
                     pass
 
 
-if __name__ == '__main__':
-    replace_text()
+#if __name__ == '__main__':
+#    replace_text()
