@@ -2,6 +2,24 @@
 '''
 # Replace the given text in file(s) or stdin.
 '''
+
+# pylint: disable=C0111     # docstrings are always outdated and wrong
+# pylint: disable=W0511     # todo is encouraged
+# pylint: disable=C0301     # line too long
+# pylint: disable=R0902     # too many instance attributes
+# pylint: disable=C0302     # too many lines in module
+# pylint: disable=C0103     # single letter var names, func name too descriptive
+# pylint: disable=R0911     # too many return statements
+# pylint: disable=R0912     # too many branches
+# pylint: disable=R0915     # too many statements
+# pylint: disable=R0913     # too many arguments
+# pylint: disable=R1702     # too many nested blocks
+# pylint: disable=R0914     # too many local variables
+# pylint: disable=R0903     # too few public methods
+# pylint: disable=E1101     # no member for base
+# pylint: disable=W0201     # attribute defined outside __init__
+
+
 import sys
 import shutil
 import tempfile
@@ -53,12 +71,8 @@ def modify_file(file_to_modify, match, replacement, verbose):
     if verbose:
         eprint(file_to_modify)
 
-    #if isinstance(file_to_modify, str):
-    #    file_to_modify = file_to_modify.encode('utf8')
     file_to_modify_basename = os.path.basename(file_to_modify)
     file_to_modify_dir = os.path.dirname(file_to_modify)
-    #temp_file_name_suffix = '-' + file_to_modify_basename + '.tmp'
-                                            #suffix=temp_file_name_suffix,
     temp_file = tempfile.NamedTemporaryFile(mode='w',
                                             prefix='tmp-',
                                             dir=file_to_modify_dir,
@@ -92,6 +106,7 @@ def modify_file(file_to_modify, match, replacement, verbose):
             shutil.move(temp_file_name, file_to_modify)
         else:
             os.unlink(temp_file_name)
+
 
 @click.command()
 @click.argument("match", nargs=1, required=False)
