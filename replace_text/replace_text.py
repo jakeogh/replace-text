@@ -113,10 +113,18 @@ def modify_file(file_to_modify, match, replacement, verbose):
 @click.argument("replacement", nargs=1, required=False)
 @click.argument("files", nargs=-1, required=False)
 @click.option('--recursive', '-r', is_flag=True)
+@click.option('--endswith', type=str)
 @click.option('--recursive-dotfiles', '-d', is_flag=True)
 @click.option('--verbose', '-v', is_flag=True)
 @click.option('--ask', is_flag=True, help="escape from shell escaping")
-def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbose, ask):
+def replace_text(match,
+                 replacement,
+                 files,
+                 recursive,
+                 recursive_dotfiles,
+                 endswith,
+                 verbose,
+                 ask):
     if match:
         if not replacement:
             print("you provided one argument, assuming it is a path", file=sys.stderr)
@@ -139,6 +147,9 @@ def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbo
     files = list(files)
 
     for file_to_modify in files:
+        if endswith:
+            if not file_to_modify.endswith(endswith):
+                continue
         if os.path.isdir(file_to_modify):
             if not recursive:
                 print("Warning: skipping folder:",
@@ -154,12 +165,18 @@ def replace_text(match, replacement, files, recursive, recursive_dotfiles, verbo
                                 eprint("skipping:", sub_file, "due to dot '.' in parent")
                             continue
                     try:
-                        modify_file(file_to_modify=sub_file, match=match, replacement=replacement, verbose=verbose)
+                        modify_file(file_to_modify=sub_file,
+                                    match=match,
+                                    replacement=replacement,
+                                    verbose=verbose)
                     except UnicodeDecodeError:
                         pass
         else:
             if is_regular_file(file_to_modify):
                 try:
-                    modify_file(file_to_modify=file_to_modify, match=match, replacement=replacement, verbose=verbose)
+                    modify_file(file_to_modify=file_to_modify,
+                                match=match,
+                                replacement=replacement,
+                                verbose=verbose)
                 except UnicodeDecodeError:
                     pass
