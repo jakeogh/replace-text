@@ -20,16 +20,18 @@
 # pylint: disable=W0201     # attribute defined outside __init__
 
 
-import sys
-import shutil
-import tempfile
 import os
+import shutil
 import stat
+import sys
+import tempfile
 from pathlib import Path
-from colorama import Fore
-from colorama import Style
+
 #from icecream import ic  # too many deps
 import click
+from colorama import Fore
+from colorama import Style
+
 #note adding deps requires changes to sendgentoo
 
 
@@ -67,7 +69,14 @@ def all_files_iter(p):
             yield sub.absolute()
 
 
-def modify_file(file_to_modify, match, replacement, verbose):
+def modify_file(*,
+                file_to_modify: Path,
+                match: str,
+                replacement: str,
+                verbose: bool,
+                debug: bool,):
+
+    assert isinstance(file_to_modify, Path)
     if verbose:
         eprint(file_to_modify)
 
@@ -115,7 +124,8 @@ def modify_file(file_to_modify, match, replacement, verbose):
 @click.option('--recursive', '-r', is_flag=True)
 @click.option('--endswith', type=str)
 @click.option('--recursive-dotfiles', '-d', is_flag=True)
-@click.option('--verbose', '-v', is_flag=True)
+@click.option('--verbose', is_flag=True)
+@click.option('--debug', is_flag=True)
 @click.option('--ask', is_flag=True, help="escape from shell escaping")
 def replace_text(match,
                  replacement,
@@ -124,6 +134,7 @@ def replace_text(match,
                  recursive_dotfiles,
                  endswith,
                  verbose,
+                 debug,
                  ask):
     if match:
         if not replacement:
@@ -168,7 +179,8 @@ def replace_text(match,
                         modify_file(file_to_modify=sub_file,
                                     match=match,
                                     replacement=replacement,
-                                    verbose=verbose)
+                                    verbose=verbose,
+                                    debug=debug,)
                     except UnicodeDecodeError:
                         pass
         else:
@@ -177,6 +189,7 @@ def replace_text(match,
                     modify_file(file_to_modify=file_to_modify,
                                 match=match,
                                 replacement=replacement,
-                                verbose=verbose)
+                                verbose=verbose,
+                                debug=debug,)
                 except UnicodeDecodeError:
                     pass
