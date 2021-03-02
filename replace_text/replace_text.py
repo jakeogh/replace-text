@@ -176,7 +176,7 @@ def replace_text(match,
                                 eprint("skipping:", sub_file, "due to dot '.' in parent")
                             continue
                     try:
-                        modify_file(file_to_modify=sub_file,
+                        modify_file(file_to_modify=Path(sub_file),
                                     match=match,
                                     replacement=replacement,
                                     verbose=verbose,
@@ -186,7 +186,7 @@ def replace_text(match,
         else:
             if is_regular_file(file_to_modify):
                 try:
-                    modify_file(file_to_modify=file_to_modify,
+                    modify_file(file_to_modify=Path(file_to_modify),
                                 match=match,
                                 replacement=replacement,
                                 verbose=verbose,
