@@ -69,12 +69,12 @@ def all_files_iter(p):
             yield sub.absolute()
 
 
-def modify_file(*,
-                file_to_modify: Path,
-                match: str,
-                replacement: str,
-                verbose: bool,
-                debug: bool,):
+def replace_text(*,
+                 file_to_modify: Path,
+                 match: str,
+                 replacement: str,
+                 verbose: bool,
+                 debug: bool,):
 
     assert isinstance(file_to_modify, Path)
     if verbose:
@@ -127,15 +127,15 @@ def modify_file(*,
 @click.option('--verbose', is_flag=True)
 @click.option('--debug', is_flag=True)
 @click.option('--ask', is_flag=True, help="escape from shell escaping")
-def replace_text(match,
-                 replacement,
-                 files,
-                 recursive,
-                 recursive_dotfiles,
-                 endswith,
-                 verbose,
-                 debug,
-                 ask):
+def cli(match,
+        replacement,
+        files,
+        recursive,
+        recursive_dotfiles,
+        endswith,
+        verbose,
+        debug,
+        ask):
     if match:
         if not replacement:
             print("you provided one argument, assuming it is a path", file=sys.stderr)
@@ -176,20 +176,20 @@ def replace_text(match,
                                 eprint("skipping:", sub_file, "due to dot '.' in parent")
                             continue
                     try:
-                        modify_file(file_to_modify=Path(sub_file),
-                                    match=match,
-                                    replacement=replacement,
-                                    verbose=verbose,
-                                    debug=debug,)
+                        replace_text(file_to_modify=Path(sub_file),
+                                     match=match,
+                                     replacement=replacement,
+                                     verbose=verbose,
+                                     debug=debug,)
                     except UnicodeDecodeError:
                         pass
         else:
             if is_regular_file(file_to_modify):
                 try:
-                    modify_file(file_to_modify=Path(file_to_modify),
-                                match=match,
-                                replacement=replacement,
-                                verbose=verbose,
-                                debug=debug,)
+                    replace_text(file_to_modify=Path(file_to_modify),
+                                 match=match,
+                                 replacement=replacement,
+                                 verbose=verbose,
+                                 debug=debug,)
                 except UnicodeDecodeError:
                     pass
