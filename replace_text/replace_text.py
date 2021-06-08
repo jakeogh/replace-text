@@ -140,7 +140,7 @@ def replace_text_bytes(*,
 
     #file_to_modify_basename = os.path.basename(file_to_modify)
     file_to_modify_dir = os.path.dirname(file_to_modify)
-    temp_file = tempfile.NamedTemporaryFile(mode='w',
+    temp_file = tempfile.NamedTemporaryFile(mode='wb',
                                             prefix='tmp-',
                                             dir=file_to_modify_dir,
                                             delete=False)
