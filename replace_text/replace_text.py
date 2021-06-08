@@ -155,7 +155,8 @@ def replace_text_bytes(*,
             location_read += 1
             window = fh.read(window_size)
 
-            ic(len(window))
+            #ic(len(window))
+            print('\n')
             eprint('match :', repr(match))
             eprint('window:', repr(window))
             #ic(window)
