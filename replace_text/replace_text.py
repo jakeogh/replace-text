@@ -163,6 +163,7 @@ def replace_text_bytes(*,
             if not window:
                 break
             if match in window:
+                eprint("True")
                 window = window.split(match)
                 window = replacement.join(window)
                 modified = True
