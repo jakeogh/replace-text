@@ -136,7 +136,7 @@ def get_thing(*,
         return match
     if match_file:
         match_file = Path(match_file)
-        with open(match_file.as_posix(), 'r') as fh:
+        with open(match_file.as_posix(), 'rb') as fh:
             file_bytes = fh.read()
         assert len(file_bytes) > 0
         return file_bytes.decode('utf8')
