@@ -147,8 +147,12 @@ def replace_text_bytes(*,
 
     # this cant handle binary files... or files with mixed newlines
     modified = False
+    location_read = 0
+    location_write = 0
     with open(file_to_modify, 'rb') as fh:
         while True:
+            fh.seek(location_read)
+            location_read += 1
             window = fh.read(window_size)
             ic(len(window))
             ic(window)
@@ -158,7 +162,7 @@ def replace_text_bytes(*,
                 window = window.split(match)
                 window = replacement.join(window)
                 modified = True
-            temp_file.write(window)
+            temp_file.write(bytes([window[0]]))
 
         temp_file_name = temp_file.name
         temp_file.close()
