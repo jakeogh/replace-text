@@ -172,7 +172,8 @@ def replace_text_bytes(*,
                     temp_file.write(window)
                     window = []
             else:
-                temp_file.write(bytes([window[0]]))
+                ic(window)
+                temp_file.write(window[0])
 
         temp_file_name = temp_file.name
         temp_file.close()
