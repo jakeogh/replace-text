@@ -154,7 +154,9 @@ def replace_text_bytes(*,
             fh.seek(location_read)
             location_read += 1
             window = fh.read(window_size)
+
             ic(len(window))
+            ic(match)
             ic(window)
             if not window:
                 break
@@ -172,6 +174,7 @@ def replace_text_bytes(*,
         else:
             os.unlink(temp_file_name)
 
+        ic(modified)
 
 def replace_text(file_to_modify: Path,
                  match,
