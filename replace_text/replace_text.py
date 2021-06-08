@@ -37,13 +37,15 @@ from colorama import Style
 
 
 def eprint(*args, **kwargs):
-    print(Fore.GREEN, file=sys.stderr, end='')
-    if 'end' in kwargs.keys():
-        print(*args, file=sys.stderr, **kwargs)
-        print(Style.RESET_ALL, file=sys.stderr, end='')
-    else:
-        print(*args, file=sys.stderr, **kwargs, end='')
-        print(Style.RESET_ALL, file=sys.stderr)
+    if 'file' in kwargs.keys():
+        kwargs.pop('file')
+    print(*args, file=sys.stderr, **kwargs)
+
+
+try:
+    from icecream import ic  # https://github.com/gruns/icecream
+except ImportError:
+    ic = eprint
 
 
 def is_regular_file(path):
@@ -128,22 +130,29 @@ def get_thing(*,
               debug: bool,
               ):
 
+    result = None
     assert prompt in ['match', 'replacement']
     if not maxone([match, match_file, ask]):
         raise ValueError('--{0} --{0}-file and --ask-{0} are mutually exclusive'.format(prompt))
     if match:
         assert len(match) > 0
-        return match
+        result = match
     if match_file:
         match_file = Path(match_file)
         with open(match_file.as_posix(), 'rb') as fh:
             file_bytes = fh.read()
         assert len(file_bytes) > 0
-        return file_bytes.decode('utf8')
+        result = file_bytes.decode('utf8')
     if ask:
         match = input(prompt)
         assert len(match) > 0
-        return match
+        result = match
+
+    if result:
+        if verbose:
+            ic(result)
+        return result
+
     raise ValueError('one of --{0} --{0}-file or --ask-{0} is required'.format(prompt))
 
 
