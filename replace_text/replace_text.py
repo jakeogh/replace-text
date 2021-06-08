@@ -131,7 +131,7 @@ def replace_text_bytes(*,
 
     assert isinstance(file_to_modify, Path)
     if verbose:
-        eprint(file_to_modify)
+        ic(file_to_modify)
 
     assert isinstance(match, bytes)
     assert isinstance(replacement, bytes)
@@ -150,6 +150,7 @@ def replace_text_bytes(*,
     with open(file_to_modify, 'rb') as fh:
         while True:
             window = fh.read(window_size)
+            ic(len(window))
             if not window:
                 break
             if match in window:
