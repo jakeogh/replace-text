@@ -29,6 +29,7 @@ from pathlib import Path
 
 #from icecream import ic  # too many deps
 import click
+from asserttool import maxone
 from colorama import Fore
 from colorama import Style
 
@@ -74,7 +75,8 @@ def replace_text(*,
                  match: str,
                  replacement: str,
                  verbose: bool,
-                 debug: bool,):
+                 debug: bool,
+                 ):
 
     assert isinstance(file_to_modify, Path)
     if verbose:
@@ -117,40 +119,76 @@ def replace_text(*,
             os.unlink(temp_file_name)
 
 
+def get_thing(*,
+              prompt: str,
+              match: str,
+              match_file: str,
+              ask: bool,
+              verbose: bool,
+              debug: bool,
+              ):
+
+    assert prompt in ['match', 'replacement']
+    if not maxone([match, match_file, ask]):
+        raise ValueError('--{0} --{0}-file and --ask-{0} are mutually exclusive'.format(prompt))
+    if match:
+        assert len(match) > 0
+        return match
+    if match_file:
+        match_file = Path(match_file)
+        with open(match_file.as_posix(), 'r') as fh:
+            file_bytes = fh.read()
+        assert len(file_bytes) > 0
+        return file_bytes.decode('utf8')
+    if ask:
+        match = input(prompt)
+        assert len(match) > 0
+        return match
+    raise ValueError('one of --{0} --{0}-file or --ask-{0} is required'.format(prompt))
+
+
+
 @click.command()
-@click.argument("match", nargs=1, required=False)
-@click.argument("replacement", nargs=1, required=False)
 @click.argument("files", nargs=-1, required=False)
+@click.option("--match", type=str)
+@click.option("--replacement", type=str)
+@click.option('--match-file', type=str)
+@click.option('--replacement-file', type=str)
 @click.option('--recursive', '-r', is_flag=True)
 @click.option('--endswith', type=str)
 @click.option('--recursive-dotfiles', '-d', is_flag=True)
 @click.option('--verbose', is_flag=True)
 @click.option('--debug', is_flag=True)
-@click.option('--ask', is_flag=True, help="escape from shell escaping")
-def cli(match,
+@click.option('--ask-match', is_flag=True, help="escape from shell escaping")
+@click.option('--ask-replacement', is_flag=True, help="escape from shell escaping")
+def cli(files,
+        match,
         replacement,
-        files,
+        match_file,
+        replacement_file,
         recursive,
         recursive_dotfiles,
         endswith,
         verbose,
         debug,
-        ask):
-    if match:
-        if not replacement:
-            print("you provided one argument, assuming it is a path", file=sys.stderr)
-            files = [match]
-            if not ask:
-                print("you must specify --ask if a match and replacement is not provided on the command line", file=sys.stderr)
-                sys.exit(1)
-            match = input("match: ")
-            replacement = input("replacement: ")
-    else:
-        if not ask:
-            print("you must specify --ask if a match and replacement is not provided on the command line", file=sys.stderr)
-            sys.exit(1)
-        match = input("match: ")
-        replacement = input("replacement: ")
+        ask_match,
+        ask_replacement,
+        ):
+
+    match = get_thing(prompt='match',
+                      match=match,
+                      match_file=match_file,
+                      ask=ask_match,
+                      verbose=verbose,
+                      debug=debug,)
+
+    replacement = get_thing(prompt='replacement',
+                            match=replacement,
+                            match_file=replacement_file,
+                            ask=ask_replacement,
+                            verbose=verbose,
+                            debug=debug,)
+
     if not files:
         for line in sys.stdin:
             print(line.replace(match, replacement), end='')
