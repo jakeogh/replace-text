@@ -279,6 +279,8 @@ def cli(files,
     files = list(files)
 
     for file_to_modify in files:
+        if verbose:
+            ic(file_to_modify)
         if endswith:
             if not file_to_modify.endswith(endswith):
                 continue
