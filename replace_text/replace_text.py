@@ -149,25 +149,30 @@ def replace_text_bytes(*,
     modified = False
     location_read = 0
     location_write = 0
+    window = []
     with open(file_to_modify, 'rb') as fh:
         while True:
             fh.seek(location_read)
             location_read += 1
-            window = fh.read(window_size)
-
-            #ic(len(window))
-            print('\n')
-            eprint('match :', repr(match))
-            eprint('window:', repr(window))
-            #ic(window)
+            window.append(fh.read(1))
             if not window:
                 break
-            if match in window:
-                eprint("True")
-                window = window.split(match)
-                window = replacement.join(window)
-                modified = True
-            temp_file.write(bytes([window[0]]))
+            if len(window) == len(match):
+                #ic(len(window))
+                print('\n')
+                eprint('match :', repr(match))
+                eprint('window:', repr(window))
+                #ic(window)
+                if window == match:
+                    eprint("matched")
+                    window = window.split(match)
+                    window = replacement.join(window)
+                    ic(window)
+                    modified = True
+                    temp_file.write(window)
+                    window = []
+            else:
+                temp_file.write(bytes([window[0]]))
 
         temp_file_name = temp_file.name
         temp_file.close()
