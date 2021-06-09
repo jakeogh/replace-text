@@ -328,12 +328,13 @@ def cli(ctx,
                       verbose=verbose,
                       debug=debug,)
 
-    replacement = get_thing(prompt='replacement',
-                            match=replacement,
-                            match_file=replacement_file,
-                            ask=ask_replacement,
-                            verbose=verbose,
-                            debug=debug,)
+    if (replacement or replacement_file or ask_replacement):
+        replacement = get_thing(prompt='replacement',
+                                match=replacement,
+                                match_file=replacement_file,
+                                ask=ask_replacement,
+                                verbose=verbose,
+                                debug=debug,)
 
     ctx.ensure_object(dict)
     null, end, verbose, debug = nevd(ctx=ctx,
