@@ -174,7 +174,7 @@ def replace_text_bytes(*,
                 eprint('window:', repr(window))
                 #ic(window)
                 # if there is a match, we know the whole window gets replaced, =>< the current window
-                if window == match:
+                if b''.join(window) == match:
                     eprint("matched")
                     window = replacement
                     ic(window)
