@@ -75,10 +75,85 @@ def all_files_iter(p):
             yield sub.absolute()
 
 
+def iterate_over_fh(fh,
+                    match,
+                    replacement,
+                    temp_file,
+                    verbose: bool,
+                    debug: bool,
+                    ):
+
+    modified = False
+    location_read = 0
+    match_count = 0
+    #location_write = 0
+    window = []
+    window_size = len(match) # need to expand a matching block by an arb amount, replacement can be any size
+
+    while True:
+        # window starts off empty
+        if verbose:
+            eprint(len(match), len(window), location_read)
+        fh.seek(location_read)
+        next_byte = fh.read(1)
+        if verbose:
+            ic(next_byte)
+        if next_byte == b'':
+            break
+
+        window.append(next_byte)
+        location_read += 1
+        # first byte in window, or EOF
+
+        #ic(b''.join(window))
+
+        if len(window) < len(match):
+            # keep filling the window
+            continue
+
+        # window is too big
+        if (len(window) - 1) == len(match):     # window needs to move
+            temp_file.write(window[0])
+            window = window[1:]
+            assert len(window) == window_size   # only time window_size is used
+
+        # if it's possible to do a match, see if there is one
+        if len(window) == len(match):
+            #ic(len(window))
+            if verbose:
+                print('\n')
+                eprint('match :', repr(match))
+                eprint('window:', repr(b''.join(window)))
+            #ic(window)
+            # if there is a match, we know the whole window gets replaced, =>< the current window
+            if b''.join(window) == match:
+                eprint("matched")
+                match_count += 1
+                if replacement:
+                    window = replacement
+                    ic(window)
+                    modified = True
+                    temp_file.write(window)  # flush the replacement to disk
+                    window = []  # start a new window, dont want to match on the replacement
+
+                continue
+            # here the window was full, but it did not match, so the window must be shifted by one byte, and the byte that fell off must be written
+
+
+        assert len(window) <= len(match)
+
+    ic('broke', modified)
+
+
+    ic(modified)
+    return match_count, modified
+
+
 def replace_text_line(*,
                       path: Path,
                       match: str,
                       replacement: str,
+                      temp_file,
                       verbose: bool,
                       debug: bool,
                       ):
@@ -88,12 +163,6 @@ def replace_text_line(*,
     if verbose:
         eprint(path)
 
-    #path_basename = os.path.basename(path)
-    path_dir = os.path.dirname(path)
-    temp_file = tempfile.NamedTemporaryFile(mode='w',
-                                            prefix='tmp-',
-                                            dir='/tmp',
-                                            delete=False)
 
     # this cant handle binary files... or files with mixed newlines
     modified = False
@@ -126,13 +195,14 @@ def replace_text_line(*,
         else:
             os.unlink(temp_file_name)
 
-        return match_count
+        return match_count, modified
 
 
 def replace_text_bytes(*,
                        path: Path,
                        match: bytes,
                        replacement: bytes,
+                       temp_file,
                        verbose: bool,
                        debug: bool,
                        ):
@@ -145,88 +215,16 @@ def replace_text_bytes(*,
     if replacement:
         assert isinstance(replacement, bytes)
 
-    window_size = len(match) # need to expand a matching block by an arb amount, replacement can be any size
-
-    #path_basename = os.path.basename(path)
-    path_dir = os.path.dirname(path)
-    temp_file = tempfile.NamedTemporaryFile(mode='wb',
-                                            prefix='tmp-',
-                                            dir='/tmp',
-                                            delete=False)
 
     # this cant handle binary files... or files with mixed newlines
-    modified = False
-    location_read = 0
-    match_count = 0
-    #location_write = 0
-    window = []
     if path.as_posix() == '/dev/stdin':
-        path = sys.stdin.buffer
-    with open(path, 'rb') as fh:
-        while True:
-            # window starts off empty
-            if verbose:
-                eprint(len(match), len(window), location_read)
-            fh.seek(location_read)
-            next_byte = fh.read(1)
-            if verbose:
-                ic(next_byte)
-            if next_byte == b'':
-                break
+        fh = sys.stdin.buffer
+        match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
+    else:
+        with open(path, 'rb') as fh:
+            match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
 
-            window.append(next_byte)
-            location_read += 1
-            # first byte in window, or EOF
-
-            #ic(b''.join(window))
-
-            if len(window) < len(match):
-                # keep filling the window
-                continue
-
-            # window is too big
-            if (len(window) - 1) == len(match):     # window needs to move
-                temp_file.write(window[0])
-                window = window[1:]
-                assert len(window) == window_size   # only time window_size is used
-
-            # if it's possible to do a match, see if there is one
-            if len(window) == len(match):
-                #ic(len(window))
-                if verbose:
-                    print('\n')
-                    eprint('match :', repr(match))
-                    eprint('window:', repr(b''.join(window)))
-                #ic(window)
-                # if there is a match, we know the whole window gets replaced, =>< the current window
-                if b''.join(window) == match:
-                    eprint("matched")
-                    match_count += 1
-                    if replacement:
-                        window = replacement
-                        ic(window)
-                        modified = True
-                        temp_file.write(window)  # flush the replacement to disk
-                        window = []  # start a new window, dont want to match on the replacement
-
-                    continue
-                # here the window was full, but it did not match, so the window must be shifted by one byte, and the byte that fell off must be written
-
-
-            assert len(window) <= len(match)
-
-        ic('broke', modified)
-
-        temp_file_name = temp_file.name
-        temp_file.close()
-        if modified:
-            shutil.copystat(path, temp_file_name)
-            shutil.move(temp_file_name, path)
-        else:
-            os.unlink(temp_file_name)
-
-        ic(modified)
-        return match_count
+    return match_count, modified
 
 
 def replace_text(path: Path,
@@ -236,23 +234,41 @@ def replace_text(path: Path,
                  debug: bool,
                  ):
 
+    #path_basename = os.path.basename(path)
+    path_dir = os.path.dirname(path)
+    temp_file = tempfile.NamedTemporaryFile(mode='w',
+                                            prefix='tmp-',
+                                            dir='/tmp',
+                                            delete=False)
+
     if isinstance(match, bytes):
-        match_count = \
+        match_count, modified = \
             replace_text_bytes(path=path,
                                match=match,
                                replacement=replacement,
+                               temp_file=temp_file,
                                verbose=verbose,
                                debug=debug,
                                )
     else:
-        match_count = \
+        match_count, modified = \
             replace_text_line(path=path,
                               match=match,
                               replacement=replacement,
+                              temp_file=temp_file,
                               verbose=verbose,
                               debug=debug,
                               )
-    return match_count
+
+    temp_file_name = temp_file.name
+    temp_file.close()
+    if modified:
+        shutil.copystat(path, temp_file_name)
+        shutil.move(temp_file_name, path)
+    else:
+        os.unlink(temp_file_name)
+
+    return match_count, modified
 
 
 def get_thing(*,
@@ -384,30 +400,31 @@ def cli(ctx,
                                 if verbose:
                                     eprint("skipping:", sub_file, "due to dot '.' in parent")
                                 continue
-                        match_count = replace_text(path=Path(sub_file),
-                                                   match=match,
-                                                   replacement=replacement,
-                                                   verbose=verbose,
-                                                   debug=debug,)
+                        match_count, modified = \
+                            replace_text(path=Path(sub_file),
+                                         match=match,
+                                         replacement=replacement,
+                                         verbose=verbose,
+                                         debug=debug,)
 
             else:
                 if is_regular_file(path):
                     try:
-                        match_count = replace_text(path=Path(path),
-                                                   match=match,
-                                                   replacement=replacement,
-                                                   verbose=verbose,
-                                                   debug=debug,)
+                        match_count, modified = \
+                            replace_text(path=Path(path),
+                                         match=match,
+                                         replacement=replacement,
+                                         verbose=verbose,
+                                         debug=debug,)
                     except UnicodeDecodeError:
                         pass
 
             eprint("matches:", match_count, path)
 
     else:   # matching on stdin
-        match_count = \
-            replace_text_bytes(path=Path('/dev/stdin'),
-                               match=match,
-                               replacement=replacement,
-                               verbose=verbose,
-                               debug=debug,
-                               )
+        match_count, modified = \
+            replace_text(path=Path('/dev/stdin'),
+                         match=match,
+                         replacement=replacement,
+                         verbose=verbose,
+                         debug=debug,)
