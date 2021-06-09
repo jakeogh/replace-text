@@ -158,7 +158,7 @@ def replace_text_bytes(*,
             window.append(fh.read(1))
             location_read += 1
             # first byte in window, or EOF
-            if not window:
+            if len(window) == 0:
                 break
 
             #ic(b''.join(window))
