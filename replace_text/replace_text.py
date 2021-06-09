@@ -80,6 +80,7 @@ def replace_text_line(*,
                       debug: bool,
                       ):
 
+    match_count = 0
     assert isinstance(file_to_modify, Path)
     if verbose:
         eprint(file_to_modify)
@@ -98,16 +99,18 @@ def replace_text_line(*,
             for line in file_to_modify_fh:
                 if match in line:
                     modified = True
-                new_line = line.replace(match, replacement)
-                temp_file.write(new_line)
-                #if file_to_modify_fh.newlines == '\n':      # LF (Unix)
-                #    temp_file.write("%s\n" % new_line)
-                #    continue
-                #elif file_to_modify_fh.newlines == '\r\n':  # CR+LF (DOS/Win)
-                #    temp_file.write("%s\r\n" % new_line)
-                #    continue
-                #elif file_to_modify_fh.newlines == '\r':    # CR (Mac OS <= v9)
-                #    temp_file.write("%s\r" % new_line)
+                    match_count += 1
+                if replacement:
+                    new_line = line.replace(match, replacement)
+                    temp_file.write(new_line)
+                    #if file_to_modify_fh.newlines == '\n':      # LF (Unix)
+                    #    temp_file.write("%s\n" % new_line)
+                    #    continue
+                    #elif file_to_modify_fh.newlines == '\r\n':  # CR+LF (DOS/Win)
+                    #    temp_file.write("%s\r\n" % new_line)
+                    #    continue
+                    #elif file_to_modify_fh.newlines == '\r':    # CR (Mac OS <= v9)
+                    #    temp_file.write("%s\r" % new_line)
         except UnicodeDecodeError as e:
             print("UnicodeDecodeError:", file_to_modify, file=sys.stderr)
             raise e
@@ -119,6 +122,8 @@ def replace_text_line(*,
             shutil.move(temp_file_name, file_to_modify)
         else:
             os.unlink(temp_file_name)
+
+        return match_count
 
 
 def replace_text_bytes(*,
@@ -134,7 +139,8 @@ def replace_text_bytes(*,
         ic(file_to_modify)
 
     assert isinstance(match, bytes)
-    assert isinstance(replacement, bytes)
+    if replacement:
+        assert isinstance(replacement, bytes)
 
     window_size = len(match) # need to expand a matching block by an arb amount, replacement can be any size
 
@@ -148,6 +154,7 @@ def replace_text_bytes(*,
     # this cant handle binary files... or files with mixed newlines
     modified = False
     location_read = 0
+    match_count = 0
     #location_write = 0
     window = []
     with open(file_to_modify, 'rb') as fh:
@@ -189,11 +196,14 @@ def replace_text_bytes(*,
                 # if there is a match, we know the whole window gets replaced, =>< the current window
                 if b''.join(window) == match:
                     eprint("matched")
-                    window = replacement
-                    ic(window)
-                    modified = True
-                    temp_file.write(window)  # flush the replacement to disk
-                    window = []  # start a new window, dont want to match on the replacement
+                    match_count += 1
+                    if replacement:
+                        window = replacement
+                        ic(window)
+                        modified = True
+                        temp_file.write(window)  # flush the replacement to disk
+                        window = []  # start a new window, dont want to match on the replacement
+
                     continue
                 # here the window was full, but it did not match, so the window must be shifted by one byte, and the byte that fell off must be written
 
@@ -211,6 +221,7 @@ def replace_text_bytes(*,
             os.unlink(temp_file_name)
 
         ic(modified)
+        return match_count
 
 
 def replace_text(file_to_modify: Path,
@@ -221,19 +232,22 @@ def replace_text(file_to_modify: Path,
                  ):
 
     if isinstance(match, bytes):
-        replace_text_bytes(file_to_modify=file_to_modify,
-                           match=match,
-                           replacement=replacement,
-                           verbose=verbose,
-                           debug=debug,
-                           )
+        match_count = \
+            replace_text_bytes(file_to_modify=file_to_modify,
+                               match=match,
+                               replacement=replacement,
+                               verbose=verbose,
+                               debug=debug,
+                               )
     else:
-        replace_text_line(file_to_modify=file_to_modify,
-                          match=match,
-                          replacement=replacement,
-                          verbose=verbose,
-                          debug=debug,
-                          )
+        match_count = \
+            replace_text_line(file_to_modify=file_to_modify,
+                              match=match,
+                              replacement=replacement,
+                              verbose=verbose,
+                              debug=debug,
+                              )
+    return match_count
 
 
 def get_thing(*,
@@ -324,6 +338,7 @@ def cli(files,
 
     files = list(files)
 
+    match_count = 0
     for file_to_modify in files:
         if verbose:
             ic(file_to_modify)
@@ -344,19 +359,22 @@ def cli(files,
                             if verbose:
                                 eprint("skipping:", sub_file, "due to dot '.' in parent")
                             continue
-                    replace_text(file_to_modify=Path(sub_file),
-                                 match=match,
-                                 replacement=replacement,
-                                 verbose=verbose,
-                                 debug=debug,)
+                    match_count = replace_text(file_to_modify=Path(sub_file),
+                                               match=match,
+                                               replacement=replacement,
+                                               verbose=verbose,
+                                               debug=debug,)
 
         else:
             if is_regular_file(file_to_modify):
                 try:
-                    replace_text(file_to_modify=Path(file_to_modify),
-                                 match=match,
-                                 replacement=replacement,
-                                 verbose=verbose,
-                                 debug=debug,)
+                    match_count = replace_text(file_to_modify=Path(file_to_modify),
+                                               match=match,
+                                               replacement=replacement,
+                                               verbose=verbose,
+                                               debug=debug,)
                 except UnicodeDecodeError:
                     pass
+
+        eprint("matches:", match_count)
+
