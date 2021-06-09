@@ -94,7 +94,7 @@ def iterate_over_fh(fh,
         # window starts off empty
         if verbose:
             eprint(len(match), len(window), location_read)
-        fh.seek(location_read)
+        #fh.seek(location_read)  # unecessary
         next_byte = fh.read(1)
         if verbose:
             ic(next_byte)
