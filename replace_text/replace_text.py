@@ -170,6 +170,12 @@ def replace_text_bytes(*,
                 # keep filling the window
                 continue
 
+            # window is too big
+            if (len(window) - 1) == len(match):     # window needs to move
+                temp_file.write(window[0])
+                window = window[1:]
+                assert len(window) == window_size   # only time window_size is used
+
             # if it's possible to do a match, see if there is one
             if len(window) == len(match):
                 #ic(len(window))
@@ -188,10 +194,6 @@ def replace_text_bytes(*,
                     continue
                 # here the window was full, but it did not match, so the window must be shifted by one byte, and the byte that fell off must be written
 
-            if (len(window) - 1) == len(match):     # window needs to move
-                temp_file.write(window[0])
-                window = window[1:]
-                assert len(window) == window_size   # only time window_size is used
 
             assert len(window) <= len(match)
 
