@@ -193,6 +193,8 @@ def replace_text_bytes(*,
                 window = window[1:]
                 assert len(window) == window_size   # only time window_size is used
 
+            assert len(window) <= len(match)
+
 
         temp_file_name = temp_file.name
         temp_file.close()
