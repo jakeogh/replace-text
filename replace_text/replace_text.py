@@ -160,6 +160,8 @@ def replace_text_bytes(*,
     match_count = 0
     #location_write = 0
     window = []
+    if path.as_posix() == '/dev/stdin':
+        path = sys.stdin.buffer
     with open(path, 'rb') as fh:
         while True:
             # window starts off empty
