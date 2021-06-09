@@ -186,10 +186,7 @@ def replace_text_bytes(*,
                     temp_file.write(window)  # flush the replacement to disk
                     window = []  # start a new window, dont want to match on the replacement
                     continue
-                else:
-                    # here the window was full, but it did not match, so the window must be shifted by one byte, and the byte that fell off must be written
-                    # the same thing needs to happen when the window was not full, so there is nothing to do down here
-                    pass
+                # here the window was full, but it did not match, so the window must be shifted by one byte, and the byte that fell off must be written
 
             if (len(window) - 1) == len(match):     # window needs to move
                 temp_file.write(window[0])
@@ -198,6 +195,7 @@ def replace_text_bytes(*,
 
             assert len(window) <= len(match)
 
+        ic('broke')
 
         temp_file_name = temp_file.name
         temp_file.close()
