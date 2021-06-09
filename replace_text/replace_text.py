@@ -188,7 +188,7 @@ def replace_text_bytes(*,
                     # the same thing needs to happen when the window was not full, so there is nothing to do down here
                     pass
 
-            if (len(window) + 1) == len(match):     # window needs to move
+            if (len(window) - 1) == len(match):     # window needs to move
                 temp_file.write(window[0])
                 window = window[1:]
                 assert len(window) == window_size   # only time window_size is used
