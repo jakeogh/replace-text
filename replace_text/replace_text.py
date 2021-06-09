@@ -335,6 +335,7 @@ def cli(ctx,
                             verbose=verbose,
                             debug=debug,)
 
+    ctx.ensure_object(dict)
     null, end, verbose, debug = nevd(ctx=ctx,
                                      printn=printn,
                                      ipython=False,
