@@ -157,7 +157,7 @@ def replace_text_bytes(*,
             fh.seek(location_read)
             next_byte = fh.read(1)
             ic(next_byte)
-            if next_byte is None:
+            if next_byte is b'':
                 break
 
             window.append(next_byte)
