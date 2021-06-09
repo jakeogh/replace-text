@@ -153,10 +153,12 @@ def replace_text_bytes(*,
     with open(file_to_modify, 'rb') as fh:
         while True:
             # window starts off empty
-            eprint(len(match), len(window), location_read)
+            if verbose:
+                eprint(len(match), len(window), location_read)
             fh.seek(location_read)
             next_byte = fh.read(1)
-            ic(next_byte)
+            if verbose:
+                ic(next_byte)
             if next_byte == b'':
                 break
 
@@ -179,9 +181,10 @@ def replace_text_bytes(*,
             # if it's possible to do a match, see if there is one
             if len(window) == len(match):
                 #ic(len(window))
-                print('\n')
-                eprint('match :', repr(match))
-                eprint('window:', repr(b''.join(window)))
+                if verbose:
+                    print('\n')
+                    eprint('match :', repr(match))
+                    eprint('window:', repr(b''.join(window)))
                 #ic(window)
                 # if there is a match, we know the whole window gets replaced, =>< the current window
                 if b''.join(window) == match:
