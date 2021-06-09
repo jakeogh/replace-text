@@ -154,6 +154,7 @@ def replace_text_bytes(*,
         while True:
             fh.seek(location_read)
             # window starts off empty
+            eprint(location_read)
             window.append(fh.read(1))
             location_read += 1
             # first byte in window, or EOF
