@@ -153,27 +153,45 @@ def replace_text_bytes(*,
     with open(file_to_modify, 'rb') as fh:
         while True:
             fh.seek(location_read)
-            location_read += 1
+            # window starts off empty
             window.append(fh.read(1))
+            location_read += 1
+            # first byte in window, or EOF
             if not window:
                 break
+
+            ic(b''.join(window))
+
+            if len(window) < len(match):
+                # keep filling the window
+                continue
+
+            # if it's possible to do a match, see if there is one
             if len(window) == len(match):
                 #ic(len(window))
                 print('\n')
                 eprint('match :', repr(match))
                 eprint('window:', repr(window))
                 #ic(window)
+                # if there is a match, we know the whole window gets replaced, =>< the current window
                 if window == match:
                     eprint("matched")
-                    window = window.split(match)
-                    window = replacement.join(window)
+                    window = replacement
                     ic(window)
                     modified = True
-                    temp_file.write(window)
-                    window = []
-            else:
-                ic(b''.join(window))
+                    temp_file.write(window)  # flush the replacement to disk
+                    window = []  # start a new window, dont want to match on the replacement
+                    continue
+                else:
+                    # here the window was full, but it did not match, so the window must be shifted by one byte, and the byte that fell off must be written
+                    # the same thing needs to happen when the window was not full, so there is nothing to do down here
+                    pass
+
+            if (len(window) + 1) == len(match):     # window needs to move
                 temp_file.write(window[0])
+                window = window[1:]
+                assert len(window) == window_size   # only time window_size is used
+
 
         temp_file_name = temp_file.name
         temp_file.close()
@@ -184,6 +202,7 @@ def replace_text_bytes(*,
             os.unlink(temp_file_name)
 
         ic(modified)
+
 
 def replace_text(file_to_modify: Path,
                  match,
