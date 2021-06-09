@@ -153,7 +153,7 @@ def replace_text_bytes(*,
     with open(file_to_modify, 'rb') as fh:
         while True:
             # window starts off empty
-            eprint(len(window), location_read)
+            eprint(len(match), len(window), location_read)
             fh.seek(location_read)
             next_byte = fh.read(1)
             ic(next_byte)
