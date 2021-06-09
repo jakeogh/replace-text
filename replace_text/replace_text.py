@@ -30,8 +30,11 @@ from pathlib import Path
 #from icecream import ic  # too many deps
 import click
 from asserttool import maxone
+from asserttool import nevd
+from asserttool import nl_iff_tty
 from colorama import Fore
 from colorama import Style
+from enumerate_input import enumerate_input
 
 #note adding deps requires changes to sendgentoo
 
@@ -73,7 +76,7 @@ def all_files_iter(p):
 
 
 def replace_text_line(*,
-                      file_to_modify: Path,
+                      path: Path,
                       match: str,
                       replacement: str,
                       verbose: bool,
@@ -81,45 +84,45 @@ def replace_text_line(*,
                       ):
 
     match_count = 0
-    assert isinstance(file_to_modify, Path)
+    assert isinstance(path, Path)
     if verbose:
-        eprint(file_to_modify)
+        eprint(path)
 
-    #file_to_modify_basename = os.path.basename(file_to_modify)
-    file_to_modify_dir = os.path.dirname(file_to_modify)
+    #path_basename = os.path.basename(path)
+    path_dir = os.path.dirname(path)
     temp_file = tempfile.NamedTemporaryFile(mode='w',
                                             prefix='tmp-',
-                                            dir=file_to_modify_dir,
+                                            dir=path_dir,
                                             delete=False)
 
     # this cant handle binary files... or files with mixed newlines
     modified = False
-    with open(file_to_modify, 'rU') as file_to_modify_fh:
+    with open(path, 'rU') as path_fh:
         try:
-            for line in file_to_modify_fh:
+            for line in path_fh:
                 if match in line:
                     modified = True
                     match_count += 1
                 if replacement:
                     new_line = line.replace(match, replacement)
                     temp_file.write(new_line)
-                    #if file_to_modify_fh.newlines == '\n':      # LF (Unix)
+                    #if path_fh.newlines == '\n':      # LF (Unix)
                     #    temp_file.write("%s\n" % new_line)
                     #    continue
-                    #elif file_to_modify_fh.newlines == '\r\n':  # CR+LF (DOS/Win)
+                    #elif path_fh.newlines == '\r\n':  # CR+LF (DOS/Win)
                     #    temp_file.write("%s\r\n" % new_line)
                     #    continue
-                    #elif file_to_modify_fh.newlines == '\r':    # CR (Mac OS <= v9)
+                    #elif path_fh.newlines == '\r':    # CR (Mac OS <= v9)
                     #    temp_file.write("%s\r" % new_line)
         except UnicodeDecodeError as e:
-            print("UnicodeDecodeError:", file_to_modify, file=sys.stderr)
+            print("UnicodeDecodeError:", path, file=sys.stderr)
             raise e
 
         temp_file_name = temp_file.name
         temp_file.close()
         if modified:
-            shutil.copystat(file_to_modify, temp_file_name)
-            shutil.move(temp_file_name, file_to_modify)
+            shutil.copystat(path, temp_file_name)
+            shutil.move(temp_file_name, path)
         else:
             os.unlink(temp_file_name)
 
@@ -127,16 +130,16 @@ def replace_text_line(*,
 
 
 def replace_text_bytes(*,
-                       file_to_modify: Path,
+                       path: Path,
                        match: bytes,
                        replacement: bytes,
                        verbose: bool,
                        debug: bool,
                        ):
 
-    assert isinstance(file_to_modify, Path)
+    assert isinstance(path, Path)
     if verbose:
-        ic(file_to_modify)
+        ic(path)
 
     assert isinstance(match, bytes)
     if replacement:
@@ -144,11 +147,11 @@ def replace_text_bytes(*,
 
     window_size = len(match) # need to expand a matching block by an arb amount, replacement can be any size
 
-    #file_to_modify_basename = os.path.basename(file_to_modify)
-    file_to_modify_dir = os.path.dirname(file_to_modify)
+    #path_basename = os.path.basename(path)
+    path_dir = os.path.dirname(path)
     temp_file = tempfile.NamedTemporaryFile(mode='wb',
                                             prefix='tmp-',
-                                            dir=file_to_modify_dir,
+                                            dir=path_dir,
                                             delete=False)
 
     # this cant handle binary files... or files with mixed newlines
@@ -157,7 +160,7 @@ def replace_text_bytes(*,
     match_count = 0
     #location_write = 0
     window = []
-    with open(file_to_modify, 'rb') as fh:
+    with open(path, 'rb') as fh:
         while True:
             # window starts off empty
             if verbose:
@@ -215,8 +218,8 @@ def replace_text_bytes(*,
         temp_file_name = temp_file.name
         temp_file.close()
         if modified:
-            shutil.copystat(file_to_modify, temp_file_name)
-            shutil.move(temp_file_name, file_to_modify)
+            shutil.copystat(path, temp_file_name)
+            shutil.move(temp_file_name, path)
         else:
             os.unlink(temp_file_name)
 
@@ -224,7 +227,7 @@ def replace_text_bytes(*,
         return match_count
 
 
-def replace_text(file_to_modify: Path,
+def replace_text(path: Path,
                  match,
                  replacement,
                  verbose: bool,
@@ -233,7 +236,7 @@ def replace_text(file_to_modify: Path,
 
     if isinstance(match, bytes):
         match_count = \
-            replace_text_bytes(file_to_modify=file_to_modify,
+            replace_text_bytes(path=path,
                                match=match,
                                replacement=replacement,
                                verbose=verbose,
@@ -241,7 +244,7 @@ def replace_text(file_to_modify: Path,
                                )
     else:
         match_count = \
-            replace_text_line(file_to_modify=file_to_modify,
+            replace_text_line(path=path,
                               match=match,
                               replacement=replacement,
                               verbose=verbose,
@@ -298,20 +301,24 @@ def get_thing(*,
 @click.option('--recursive-dotfiles', '-d', is_flag=True)
 @click.option('--verbose', is_flag=True)
 @click.option('--debug', is_flag=True)
+@click.option('--printn', is_flag=True)
 @click.option('--ask-match', is_flag=True, help="escape from shell escaping")
 @click.option('--ask-replacement', is_flag=True, help="escape from shell escaping")
-def cli(files,
-        match,
-        replacement,
-        match_file,
-        replacement_file,
-        recursive,
-        recursive_dotfiles,
-        endswith,
-        verbose,
-        debug,
-        ask_match,
-        ask_replacement,
+@click.pass_context
+def cli(ctx,
+        files,
+        match: str,
+        replacement: str,
+        match_file: str,
+        replacement_file: str,
+        recursive: bool,
+        recursive_dotfiles: bool,
+        endswith: str,
+        verbose: bool,
+        debug: bool,
+        printn: bool,
+        ask_match: bool,
+        ask_replacement: bool,
         ):
 
     match = get_thing(prompt='match',
@@ -328,48 +335,57 @@ def cli(files,
                             verbose=verbose,
                             debug=debug,)
 
-
-    if isinstance(match, bytes):
-        assert isinstance(replacement, bytes)
-
-    if not files:  # todo: enumerate_input
-        for line in sys.stdin:
-            print(line.replace(match, replacement), end='')
-
-    files = list(files)
+    null, end, verbose, debug = nevd(ctx=ctx,
+                                     printn=printn,
+                                     ipython=False,
+                                     verbose=verbose,
+                                     debug=debug,)
 
     match_count = 0
-    for file_to_modify in files:
-        file_to_modify = Path(file_to_modify).resolve()
+    iterator = files
+    for index, path in enumerate_input(iterator=iterator,
+                                       null=null,
+                                       progress=False,
+                                       skip=None,
+                                       head=None,
+                                       tail=None,
+                                       debug=debug,
+                                       verbose=verbose,):
+        path = Path(path)
+
         if verbose:
-            ic(file_to_modify)
+            ic(index, path)
+
+        path = Path(path).resolve()
+        if verbose:
+            ic(path)
         if endswith:
-            if not file_to_modify.endswith(endswith):
+            if not path.endswith(endswith):
                 continue
-        if os.path.isdir(file_to_modify):
+        if os.path.isdir(path):
             if not recursive:
                 print("Warning: skipping folder:",
-                      file_to_modify,
+                      path,
                       "specify --recursive to decend into it.", file=sys.stderr)
                 continue
 
-            for sub_file in all_files_iter(file_to_modify):
+            for sub_file in all_files_iter(path):
                 if is_regular_file(sub_file):
                     if '.' in os.fsdecode(sub_file.parent):
                         if not recursive_dotfiles:
                             if verbose:
                                 eprint("skipping:", sub_file, "due to dot '.' in parent")
                             continue
-                    match_count = replace_text(file_to_modify=Path(sub_file),
+                    match_count = replace_text(path=Path(sub_file),
                                                match=match,
                                                replacement=replacement,
                                                verbose=verbose,
                                                debug=debug,)
 
         else:
-            if is_regular_file(file_to_modify):
+            if is_regular_file(path):
                 try:
-                    match_count = replace_text(file_to_modify=Path(file_to_modify),
+                    match_count = replace_text(path=Path(path),
                                                match=match,
                                                replacement=replacement,
                                                verbose=verbose,
@@ -377,5 +393,5 @@ def cli(files,
                 except UnicodeDecodeError:
                     pass
 
-        eprint("matches:", match_count, file_to_modify)
+        eprint("matches:", match_count, path)
 
