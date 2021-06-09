@@ -152,9 +152,9 @@ def replace_text_bytes(*,
     window = []
     with open(file_to_modify, 'rb') as fh:
         while True:
-            fh.seek(location_read)
             # window starts off empty
-            eprint(location_read)
+            eprint(len(window), location_read)
+            fh.seek(location_read)
             window.append(fh.read(1))
             location_read += 1
             # first byte in window, or EOF
