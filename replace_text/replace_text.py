@@ -418,6 +418,9 @@ def cli(ctx,
             eprint("matches:", match_count, path)
 
     else:   # matching on stdin
+        match = match.encode('utf8')
+        if replacement:
+            replacement = replacement.encode('utf8')
         match_count, modified = \
             replace_text_bytes(path=Path('/dev/stdin'),
                                match=match,
