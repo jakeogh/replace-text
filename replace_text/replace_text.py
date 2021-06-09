@@ -352,7 +352,10 @@ def cli(ctx,
 
     #path_basename = os.path.basename(path)
     #path_dir = os.path.dirname(path)
-    temp_file = tempfile.NamedTemporaryFile(mode='w',
+    mode = 'w'
+    if isinstance(match, bytes):
+        mode = 'wb'
+    temp_file = tempfile.NamedTemporaryFile(mode=mode,
                                             prefix='tmp-',
                                             dir='/tmp',
                                             delete=False)
