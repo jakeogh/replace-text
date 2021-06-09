@@ -155,11 +155,13 @@ def replace_text_bytes(*,
             # window starts off empty
             eprint(len(window), location_read)
             fh.seek(location_read)
-            window.append(fh.read(1))
+            next_byte = fh.read(1)
+            if next_byte is None:
+                break
+
+            window.append(next_byte)
             location_read += 1
             # first byte in window, or EOF
-            if len(window) == 0:
-                break
 
             #ic(b''.join(window))
 
