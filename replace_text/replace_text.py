@@ -230,16 +230,10 @@ def replace_text_bytes(*,
 def replace_text(path: Path,
                  match,
                  replacement,
+                 temp_file,
                  verbose: bool,
                  debug: bool,
                  ):
-
-    #path_basename = os.path.basename(path)
-    path_dir = os.path.dirname(path)
-    temp_file = tempfile.NamedTemporaryFile(mode='w',
-                                            prefix='tmp-',
-                                            dir='/tmp',
-                                            delete=False)
 
     if isinstance(match, bytes):
         match_count, modified = \
@@ -260,13 +254,6 @@ def replace_text(path: Path,
                               debug=debug,
                               )
 
-    temp_file_name = temp_file.name
-    temp_file.close()
-    if modified:
-        shutil.copystat(path, temp_file_name)
-        shutil.move(temp_file_name, path)
-    else:
-        os.unlink(temp_file_name)
 
     return match_count, modified
 
@@ -363,6 +350,13 @@ def cli(ctx,
                                      verbose=verbose,
                                      debug=debug,)
 
+    #path_basename = os.path.basename(path)
+    #path_dir = os.path.dirname(path)
+    temp_file = tempfile.NamedTemporaryFile(mode='w',
+                                            prefix='tmp-',
+                                            dir='/tmp',
+                                            delete=False)
+
     match_count = 0
     iterator = files
 
@@ -404,6 +398,7 @@ def cli(ctx,
                             replace_text(path=Path(sub_file),
                                          match=match,
                                          replacement=replacement,
+                                         temp_file=temp_file,
                                          verbose=verbose,
                                          debug=debug,)
 
@@ -414,6 +409,7 @@ def cli(ctx,
                             replace_text(path=Path(path),
                                          match=match,
                                          replacement=replacement,
+                                         temp_file=temp_file,
                                          verbose=verbose,
                                          debug=debug,)
                     except UnicodeDecodeError:
@@ -423,8 +419,17 @@ def cli(ctx,
 
     else:   # matching on stdin
         match_count, modified = \
-            replace_text(path=Path('/dev/stdin'),
-                         match=match,
-                         replacement=replacement,
-                         verbose=verbose,
-                         debug=debug,)
+            replace_text_bytes(path=Path('/dev/stdin'),
+                               match=match,
+                               replacement=replacement,
+                               temp_file=temp_file,
+                               verbose=verbose,
+                               debug=debug,)
+
+    temp_file_name = temp_file.name
+    temp_file.close()
+    if modified:
+        shutil.copystat(path, temp_file_name)
+        shutil.move(temp_file_name, path)
+    else:
+        os.unlink(temp_file_name)
