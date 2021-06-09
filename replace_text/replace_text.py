@@ -156,6 +156,7 @@ def replace_text_bytes(*,
             eprint(len(window), location_read)
             fh.seek(location_read)
             next_byte = fh.read(1)
+            ic(next_byte)
             if next_byte is None:
                 break
 
