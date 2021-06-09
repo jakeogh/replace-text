@@ -92,7 +92,7 @@ def replace_text_line(*,
     path_dir = os.path.dirname(path)
     temp_file = tempfile.NamedTemporaryFile(mode='w',
                                             prefix='tmp-',
-                                            dir=path_dir,
+                                            dir='/tmp',
                                             delete=False)
 
     # this cant handle binary files... or files with mixed newlines
@@ -151,7 +151,7 @@ def replace_text_bytes(*,
     path_dir = os.path.dirname(path)
     temp_file = tempfile.NamedTemporaryFile(mode='wb',
                                             prefix='tmp-',
-                                            dir=path_dir,
+                                            dir='/tmp',
                                             delete=False)
 
     # this cant handle binary files... or files with mixed newlines
