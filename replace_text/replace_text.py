@@ -302,6 +302,7 @@ def get_thing(*,
 @click.option('--verbose', is_flag=True)
 @click.option('--debug', is_flag=True)
 @click.option('--printn', is_flag=True)
+@click.option('--paths', is_flag=True)
 @click.option('--ask-match', is_flag=True, help="escape from shell escaping")
 @click.option('--ask-replacement', is_flag=True, help="escape from shell escaping")
 @click.pass_context
@@ -317,6 +318,7 @@ def cli(ctx,
         verbose: bool,
         debug: bool,
         printn: bool,
+        paths: bool,
         ask_match: bool,
         ask_replacement: bool,
         ):
@@ -345,55 +347,65 @@ def cli(ctx,
 
     match_count = 0
     iterator = files
-    for index, path in enumerate_input(iterator=iterator,
-                                       null=null,
-                                       progress=False,
-                                       skip=None,
-                                       head=None,
-                                       tail=None,
-                                       debug=debug,
-                                       verbose=verbose,):
-        path = Path(path)
 
-        if verbose:
-            ic(index, path)
+    if paths:
+        for index, path in enumerate_input(iterator=iterator,
+                                           null=null,
+                                           progress=False,
+                                           skip=None,
+                                           head=None,
+                                           tail=None,
+                                           debug=debug,
+                                           verbose=verbose,):
+            path = Path(path)
 
-        path = Path(path).resolve()
-        if verbose:
-            ic(path)
-        if endswith:
-            if not path.endswith(endswith):
-                continue
-        if os.path.isdir(path):
-            if not recursive:
-                print("Warning: skipping folder:",
-                      path,
-                      "specify --recursive to decend into it.", file=sys.stderr)
-                continue
+            if verbose:
+                ic(index, path)
 
-            for sub_file in all_files_iter(path):
-                if is_regular_file(sub_file):
-                    if '.' in os.fsdecode(sub_file.parent):
-                        if not recursive_dotfiles:
-                            if verbose:
-                                eprint("skipping:", sub_file, "due to dot '.' in parent")
-                            continue
-                    match_count = replace_text(path=Path(sub_file),
-                                               match=match,
-                                               replacement=replacement,
-                                               verbose=verbose,
-                                               debug=debug,)
+            path = Path(path).resolve()
+            if verbose:
+                ic(path)
+            if endswith:
+                if not path.endswith(endswith):
+                    continue
+            if os.path.isdir(path):
+                if not recursive:
+                    print("Warning: skipping folder:",
+                          path,
+                          "specify --recursive to decend into it.", file=sys.stderr)
+                    continue
 
-        else:
-            if is_regular_file(path):
-                try:
-                    match_count = replace_text(path=Path(path),
-                                               match=match,
-                                               replacement=replacement,
-                                               verbose=verbose,
-                                               debug=debug,)
-                except UnicodeDecodeError:
-                    pass
+                for sub_file in all_files_iter(path):
+                    if is_regular_file(sub_file):
+                        if '.' in os.fsdecode(sub_file.parent):
+                            if not recursive_dotfiles:
+                                if verbose:
+                                    eprint("skipping:", sub_file, "due to dot '.' in parent")
+                                continue
+                        match_count = replace_text(path=Path(sub_file),
+                                                   match=match,
+                                                   replacement=replacement,
+                                                   verbose=verbose,
+                                                   debug=debug,)
 
-        eprint("matches:", match_count, path)
+            else:
+                if is_regular_file(path):
+                    try:
+                        match_count = replace_text(path=Path(path),
+                                                   match=match,
+                                                   replacement=replacement,
+                                                   verbose=verbose,
+                                                   debug=debug,)
+                    except UnicodeDecodeError:
+                        pass
 
+            eprint("matches:", match_count, path)
+
+    else:   # matching on stdin
+        match_count = \
+            replace_text_bytes(path=Path('/dev/stdin'),
+                               match=match,
+                               replacement=replacement,
+                               verbose=verbose,
+                               debug=debug,
+                               )
