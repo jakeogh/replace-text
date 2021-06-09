@@ -340,6 +340,7 @@ def cli(files,
 
     match_count = 0
     for file_to_modify in files:
+        file_to_modify = Path(file_to_modify).resolve()
         if verbose:
             ic(file_to_modify)
         if endswith:
@@ -376,5 +377,5 @@ def cli(files,
                 except UnicodeDecodeError:
                     pass
 
-        eprint("matches:", match_count)
+        eprint("matches:", match_count, file_to_modify)
 
