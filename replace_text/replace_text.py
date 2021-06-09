@@ -160,7 +160,7 @@ def replace_text_bytes(*,
             if not window:
                 break
 
-            ic(b''.join(window))
+            #ic(b''.join(window))
 
             if len(window) < len(match):
                 # keep filling the window
