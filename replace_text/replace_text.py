@@ -430,6 +430,14 @@ def cli(ctx,
             ic(output_fh)
             output_fh.close()
 
+            output_fh_name = output_fh.name
+            ic(output_fh_name)
+            if modified:
+                shutil.copystat(path, output_fh_name)
+                shutil.move(output_fh_name, path)
+            else:
+                os.unlink(output_fh_name)
+
 
         return
 
