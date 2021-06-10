@@ -91,6 +91,7 @@ def iterate_over_fh(input_fh,
     window = []
     window_size = len(match) # need to expand a matching block by an arb amount, replacement can be any size
 
+    ic(input_fh, output_fh)
     while True:
         # window starts off empty
         if verbose:
