@@ -96,8 +96,8 @@ def iterate_over_fh(input_fh,
 
     while True:
         # window starts off empty
-        if verbose:
-            eprint(len(match), len(window), location_read)
+        if debug:
+            ic(len(match), len(window), location_read)
         #fh.seek(location_read)  # unecessary
         next_byte = input_fh.read(1)
         if debug:
