@@ -203,35 +203,35 @@ def replace_text_line(*,
         return match_count, modified
 
 
-def replace_text_bytes(*,
-                       fh,
-                       match: bytes,
-                       replacement: bytes,
-                       temp_file,
-                       verbose: bool,
-                       debug: bool,
-                       ):
-
-    #assert isinstance(path, Path)
-    #if verbose:
-    #    ic(path)
-
-    assert isinstance(match, bytes)
-    if replacement:
-        assert isinstance(replacement, bytes)
-
-
-    ## this cant handle binary files... or files with mixed newlines
-    #if path.as_posix() == '/dev/stdin':
-    #    fh = sys.stdin.buffer
-    #    match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
-    #else:
-    #    with open(path, 'rb') as fh:
-    #        match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
-
-    match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
-
-    return match_count, modified
+#def replace_text_bytes(*,
+#                       fh,
+#                       match: bytes,
+#                       replacement: bytes,
+#                       temp_file,
+#                       verbose: bool,
+#                       debug: bool,
+#                       ):
+#
+#    #assert isinstance(path, Path)
+#    #if verbose:
+#    #    ic(path)
+#
+#    assert isinstance(match, bytes)
+#    if replacement:
+#        assert isinstance(replacement, bytes)
+#
+#
+#    ## this cant handle binary files... or files with mixed newlines
+#    #if path.as_posix() == '/dev/stdin':
+#    #    fh = sys.stdin.buffer
+#    #    match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
+#    #else:
+#    #    with open(path, 'rb') as fh:
+#    #        match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
+#
+#    match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
+#
+#    return match_count, modified
 
 
 def replace_text(path: Path,
