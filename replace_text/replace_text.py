@@ -100,7 +100,7 @@ def iterate_over_fh(input_fh,
             eprint(len(match), len(window), location_read)
         #fh.seek(location_read)  # unecessary
         next_byte = input_fh.read(1)
-        if verbose:
+        if debug:
             ic(next_byte)
         if next_byte == b'':
             break
@@ -125,7 +125,7 @@ def iterate_over_fh(input_fh,
         # if it's possible to do a match, see if there is one
         if len(window) == len(match):
             #ic(len(window))
-            if verbose:
+            if debug:
                 print('\n')
                 eprint('match :', repr(match))
                 eprint('window:', repr(b''.join(window)))
