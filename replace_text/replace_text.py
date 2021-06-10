@@ -430,16 +430,17 @@ def cli(ctx,
 
             if verbose:
                 ic(output_fh)
-            output_fh.close()
 
-            output_fh_path = output_fh.name
-            if verbose:
-                ic(output_fh_path)
-            if modified:
-                shutil.copystat(path, output_fh_path)
-                shutil.move(output_fh_path, path)
-            else:
-                os.unlink(output_fh_path)
+            if not stdout:
+                output_fh.close()
+                output_fh_path = output_fh.name
+                if verbose:
+                    ic(output_fh_path)
+                if modified:
+                    shutil.copystat(path, output_fh_path)
+                    shutil.move(output_fh_path, path)
+                else:
+                    os.unlink(output_fh_path)
 
 
             if replacement is None:
