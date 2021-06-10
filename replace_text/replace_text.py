@@ -358,6 +358,7 @@ def cli(ctx,
     mode = 'w'
     if isinstance(match, bytes):
         mode = 'wb'
+    ic(mode)
     temp_file = tempfile.NamedTemporaryFile(mode=mode,
                                             prefix='tmp-',
                                             dir='/tmp',
@@ -429,7 +430,7 @@ def cli(ctx,
         if replacement:
             replacement = replacement.encode('utf8')
         ic(match, replacement)
-
+        ic(temp_file)
         fh = sys.stdin.buffer
         match_count, modified = \
             iterate_over_fh(fh=fh,
