@@ -430,6 +430,11 @@ def cli(ctx,
         if replacement:
             replacement = replacement.encode('utf8')
         ic(match, replacement)
+        mode='wb'
+        temp_file = tempfile.NamedTemporaryFile(mode=mode,
+                                                prefix='tmp-',
+                                                dir='/tmp',
+                                                delete=False)
         ic(temp_file)
         ic(temp_file.mode)
         fh = sys.stdin.buffer
