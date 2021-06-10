@@ -128,11 +128,13 @@ def iterate_over_fh(input_fh,
             #ic(window)
             # if there is a match, we know the whole window gets replaced, =>< the current window
             if b''.join(window) == match:
-                eprint("matched")
+                if verbose:
+                    ic('matched')
                 match_count += 1
                 if replacement:
                     window = replacement
-                    ic(window)
+                    if verbose:
+                        ic(window)
                     modified = True
                     output_fh.write(window)  # flush the replacement to disk
                     window = []  # start a new window, dont want to match on the replacement
