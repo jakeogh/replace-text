@@ -35,6 +35,7 @@ from asserttool import nl_iff_tty
 from colorama import Fore
 from colorama import Style
 from enumerate_input import enumerate_input
+from enumerate_input import iterate_input
 
 #note adding deps requires changes to sendgentoo
 
@@ -75,10 +76,10 @@ def all_files_iter(p):
             yield sub.absolute()
 
 
-def iterate_over_fh(fh,
+def iterate_over_fh(input_fh,
                     match,
                     replacement,
-                    temp_file,
+                    output_fh,
                     verbose: bool,
                     debug: bool,
                     ):
@@ -95,7 +96,7 @@ def iterate_over_fh(fh,
         if verbose:
             eprint(len(match), len(window), location_read)
         #fh.seek(location_read)  # unecessary
-        next_byte = fh.read(1)
+        next_byte = input_fh.read(1)
         if verbose:
             ic(next_byte)
         if next_byte == b'':
@@ -113,7 +114,7 @@ def iterate_over_fh(fh,
 
         # window is too big
         if (len(window) - 1) == len(match):     # window needs to move
-            temp_file.write(window[0])
+            output_fh.write(window[0])
             window = window[1:]
             assert len(window) == window_size   # only time window_size is used
 
@@ -133,7 +134,7 @@ def iterate_over_fh(fh,
                     window = replacement
                     ic(window)
                     modified = True
-                    temp_file.write(window)  # flush the replacement to disk
+                    output_fh.write(window)  # flush the replacement to disk
                     window = []  # start a new window, dont want to match on the replacement
 
                 continue
@@ -309,8 +310,10 @@ def get_thing(*,
 @click.option('--recursive-dotfiles', '-d', is_flag=True)
 @click.option('--verbose', is_flag=True)
 @click.option('--debug', is_flag=True)
+@click.option('--utf8', is_flag=True)
 @click.option('--printn', is_flag=True)
 @click.option('--paths', is_flag=True)
+@click.option('--stdout', is_flag=True)
 @click.option('--ask-match', is_flag=True, help="escape from shell escaping")
 @click.option('--ask-replacement', is_flag=True, help="escape from shell escaping")
 @click.pass_context
@@ -325,8 +328,10 @@ def cli(ctx,
         endswith: str,
         verbose: bool,
         debug: bool,
+        utf8: bool,
         printn: bool,
         paths: bool,
+        stdout: bool,
         ask_match: bool,
         ask_replacement: bool,
         ):
@@ -353,103 +358,171 @@ def cli(ctx,
                                      verbose=verbose,
                                      debug=debug,)
 
-    #path_basename = os.path.basename(path)
-    #path_dir = os.path.dirname(path)
-    mode = 'w'
-    if isinstance(match, bytes):
-        mode = 'wb'
-    ic(mode)
-    temp_file = tempfile.NamedTemporaryFile(mode=mode,
-                                            prefix='tmp-',
-                                            dir='/tmp',
-                                            delete=False)
 
-    match_count = 0
-    iterator = files
 
-    if paths:
-        for index, path in enumerate_input(iterator=iterator,
-                                           null=null,
-                                           progress=False,
-                                           skip=None,
-                                           head=None,
-                                           tail=None,
-                                           debug=debug,
-                                           verbose=verbose,):
-            path = Path(path)
-
-            if verbose:
-                ic(index, path)
-
-            path = Path(path).resolve()
-            if verbose:
-                ic(path)
-            if endswith:
-                if not path.endswith(endswith):
-                    continue
-            if os.path.isdir(path):
-                if not recursive:
-                    print("Warning: skipping folder:",
-                          path,
-                          "specify --recursive to decend into it.", file=sys.stderr)
-                    continue
-
-                for sub_file in all_files_iter(path):
-                    if is_regular_file(sub_file):
-                        if '.' in os.fsdecode(sub_file.parent):
-                            if not recursive_dotfiles:
-                                if verbose:
-                                    eprint("skipping:", sub_file, "due to dot '.' in parent")
-                                continue
-                        match_count, modified = \
-                            replace_text(path=Path(sub_file),
-                                         match=match,
-                                         replacement=replacement,
-                                         temp_file=temp_file,
-                                         verbose=verbose,
-                                         debug=debug,)
-
-            else:
-                if is_regular_file(path):
-                    try:
-                        match_count, modified = \
-                            replace_text(path=Path(path),
-                                         match=match,
-                                         replacement=replacement,
-                                         temp_file=temp_file,
-                                         verbose=verbose,
-                                         debug=debug,)
-                    except UnicodeDecodeError:
-                        pass
-
-            eprint("matches:", match_count, path)
-
-    else:   # matching on stdin
-        ic('stdin path')
-        match = match.encode('utf8')
-        if replacement:
-            replacement = replacement.encode('utf8')
-        ic(match, replacement)
-        mode='wb'
-        temp_file = tempfile.NamedTemporaryFile(mode=mode,
-                                                prefix='tmp-',
-                                                dir='/tmp',
-                                                delete=False)
-        ic(temp_file)
-        ic(temp_file.mode)
-        fh = sys.stdin.buffer
-        match_count, modified = \
-            iterate_over_fh(fh=fh,
-                            match=match,
-                            replacement=replacement,
-                            temp_file=temp_file,
-                            verbose=verbose,
-                            debug=debug,)
-
-    temp_file_name = temp_file.name
-    temp_file.close()
-    if modified:
-        shutil.copystat(path, temp_file_name)
-        shutil.move(temp_file_name, path)
+    if utf8:
+        write_mode = 'w'
+        read_mode = 'r'
     else:
-        os.unlink(temp_file_name)
+        write_mode = 'wb'
+        read_mode = 'rb'
+
+    #if files:   # got files on command line, shouldnt be expeecting input on stdin
+    disable_stdin = False
+    if files:
+        disable_stdin = True
+
+    if not (files or paths):
+        stdout = True
+
+    input_file_iterator = None
+    if paths or files:
+        input_file_iterator = iterate_input(iterator=files,
+                                            null=null,
+                                            dont_decode=False,  # yield strs that get passed to Path()
+                                            disable_stdin=disable_stdin,
+                                            skip=None,
+                                            head=None,
+                                            tail=None,
+                                            random=False,
+                                            loop=None,
+                                            input_filter_function=None,
+                                            debug=debug,
+                                            verbose=verbose,)
+        for path in input_file_iterator:
+            path = Path(path)
+            if stdout:
+                if utf8:
+                    output_fh = sys.stdout
+                else:
+                    output_fh = sys.stdout.buffer
+
+            with open(path, read_mode) as input_fh:
+                match_count, modified = iterate_over_fh(input_fh=input_fh,
+                                                        match=match,
+                                                        replacement=replacement,
+                                                        output_fh=output_fh,
+                                                        verbose=verbose,
+                                                        debug=debug,)
+
+
+
+        return
+
+#    #    assert not paths    # need to iterate over files
+#
+#    if not (paths or files):
+#        # read bytes from stdin and look for matches
+#        if utf8:
+#            input_fh = sys.stdin
+#        else:
+#            input_fh = sys.stdin.buffer
+#
+#    ic(utf8, read_mode, write_mode, input_fh, )
+#
+#
+#
+#
+#
+#
+#
+#    #path_basename = os.path.basename(path)
+#    #path_dir = os.path.dirname(path)
+#    mode = 'w'
+#    if isinstance(match, bytes):
+#        mode = 'wb'
+#    ic(mode)
+#    temp_file = tempfile.NamedTemporaryFile(mode=mode,
+#                                            prefix='tmp-',
+#                                            dir='/tmp',
+#                                            delete=False)
+#
+#    match_count = 0
+#    iterator = files
+#
+#    if paths:
+#        for index, path in enumerate_input(iterator=iterator,
+#                                           null=null,
+#                                           progress=False,
+#                                           skip=None,
+#                                           head=None,
+#                                           tail=None,
+#                                           debug=debug,
+#                                           verbose=verbose,):
+#            path = Path(path)
+#
+#            if verbose:
+#                ic(index, path)
+#
+#            path = Path(path).resolve()
+#            if verbose:
+#                ic(path)
+#            if endswith:
+#                if not path.endswith(endswith):
+#                    continue
+#            if os.path.isdir(path):
+#                if not recursive:
+#                    print("Warning: skipping folder:",
+#                          path,
+#                          "specify --recursive to decend into it.", file=sys.stderr)
+#                    continue
+#
+#                for sub_file in all_files_iter(path):
+#                    if is_regular_file(sub_file):
+#                        if '.' in os.fsdecode(sub_file.parent):
+#                            if not recursive_dotfiles:
+#                                if verbose:
+#                                    eprint("skipping:", sub_file, "due to dot '.' in parent")
+#                                continue
+#                        match_count, modified = \
+#                            replace_text(path=Path(sub_file),
+#                                         match=match,
+#                                         replacement=replacement,
+#                                         temp_file=temp_file,
+#                                         verbose=verbose,
+#                                         debug=debug,)
+#
+#            else:
+#                if is_regular_file(path):
+#                    try:
+#                        match_count, modified = \
+#                            replace_text(path=Path(path),
+#                                         match=match,
+#                                         replacement=replacement,
+#                                         temp_file=temp_file,
+#                                         verbose=verbose,
+#                                         debug=debug,)
+#                    except UnicodeDecodeError:
+#                        pass
+#
+#            eprint("matches:", match_count, path)
+#
+#    else:   # matching on stdin
+#        ic('stdin path')
+#        match = match.encode('utf8')
+#        if replacement:
+#            replacement = replacement.encode('utf8')
+#        ic(match, replacement)
+#        mode='wb'
+#        temp_file = tempfile.NamedTemporaryFile(mode=mode,
+#                                                prefix='tmp-',
+#                                                dir='/tmp',
+#                                                delete=False)
+#        ic(temp_file)
+#        ic(temp_file.mode)
+#        fh = sys.stdin.buffer
+#        match_count, modified = \
+#            iterate_over_fh(fh=fh,
+#                            match=match,
+#                            replacement=replacement,
+#                            temp_file=temp_file,
+#                            verbose=verbose,
+#                            debug=debug,)
+#
+#    temp_file_name = temp_file.name
+#    temp_file.close()
+#    if modified:
+#        shutil.copystat(path, temp_file_name)
+#        shutil.move(temp_file_name, path)
+#    else:
+#        os.unlink(temp_file_name)
