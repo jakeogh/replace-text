@@ -117,7 +117,8 @@ def iterate_over_fh(input_fh,
 
         # window is too big
         if (len(window) - 1) == len(match):     # window needs to move
-            output_fh.write(window[0])
+            if output_fh:
+                output_fh.write(window[0])
             window = window[1:]
             assert len(window) == window_size   # only time window_size is used
 
@@ -139,7 +140,8 @@ def iterate_over_fh(input_fh,
                     if verbose:
                         ic(window)
                     modified = True
-                    output_fh.write(window)  # flush the replacement to disk
+                    if output_fh:
+                        output_fh.write(window)  # flush the replacement to disk
                     window = []  # start a new window, dont want to match on the replacement
 
                 continue
@@ -399,6 +401,9 @@ def cli(ctx,
         else:
             output_fh = sys.stdout.buffer
 
+    if not replacement:
+        output_fh = None    # just print match_count and file_name
+
     input_file_iterator = None
     if paths or files:
         input_file_iterator = iterate_input(iterator=files,
@@ -419,10 +424,11 @@ def cli(ctx,
 
             with open(path, read_mode) as input_fh:
                 if not output_fh:
-                    output_fh = tempfile.NamedTemporaryFile(mode=write_mode,
-                                                            prefix='tmp-replace_text-',
-                                                            dir='/tmp',
-                                                            delete=False)
+                    if replacement:
+                        output_fh = tempfile.NamedTemporaryFile(mode=write_mode,
+                                                                prefix='tmp-replace_text-',
+                                                                dir='/tmp',
+                                                                delete=False)
 
                 match_count, modified = iterate_over_fh(input_fh=input_fh,
                                                         match=match,
