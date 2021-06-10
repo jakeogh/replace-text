@@ -390,6 +390,9 @@ def cli(ctx,
     if not (files or paths):
         stdout = True
 
+    if paths and not replacement:
+        stdout = True
+
     output_fh = None
     if stdout:
         if utf8:
