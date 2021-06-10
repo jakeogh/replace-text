@@ -471,7 +471,10 @@ def cli(ctx,
                                                 debug=debug,)
 
         if replacement is None:
-            ic(match_count, input_fh)
+            if verbose:
+                ic(match_count, input_fh)
+            if match_count > 0:
+                print(match_count, input_fh, end=end)
 
         return
 
