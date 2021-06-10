@@ -389,6 +389,7 @@ def cli(ctx,
     if not (files or paths):
         stdout = True
 
+    output_fh = None
     if stdout:
         if utf8:
             output_fh = sys.stdout
@@ -413,6 +414,12 @@ def cli(ctx,
             path = Path(path)
 
             with open(path, read_mode) as input_fh:
+                if not output_fh:
+                    output_fh = tempfile.NamedTemporaryFile(mode=write_mode,
+                                                            prefix='tmp-replace_text-',
+                                                            dir='/tmp',
+                                                            delete=False)
+
                 match_count, modified = iterate_over_fh(input_fh=input_fh,
                                                         match=match,
                                                         replacement=replacement,
@@ -420,6 +427,8 @@ def cli(ctx,
                                                         verbose=verbose,
                                                         debug=debug,)
 
+            ic(output_fh)
+            output_fh.close()
 
 
         return
