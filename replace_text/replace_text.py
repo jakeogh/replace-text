@@ -145,10 +145,9 @@ def iterate_over_fh(input_fh,
 
         assert len(window) <= len(match)
 
-    ic('broke', modified)
+    if verbose:
+        ic('broke', modified)
 
-
-    ic(modified)
     return match_count, modified
 
 
