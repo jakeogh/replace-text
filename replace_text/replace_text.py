@@ -411,6 +411,7 @@ def cli(ctx,
                                             input_filter_function=None,
                                             debug=debug,
                                             verbose=verbose,)
+        assert stdout
         for path in input_file_iterator:
             path = Path(path)
 
