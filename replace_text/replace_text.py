@@ -199,7 +199,7 @@ def replace_text_line(*,
 
 
 def replace_text_bytes(*,
-                       path: Path,
+                       fh,
                        match: bytes,
                        replacement: bytes,
                        temp_file,
@@ -207,22 +207,24 @@ def replace_text_bytes(*,
                        debug: bool,
                        ):
 
-    assert isinstance(path, Path)
-    if verbose:
-        ic(path)
+    #assert isinstance(path, Path)
+    #if verbose:
+    #    ic(path)
 
     assert isinstance(match, bytes)
     if replacement:
         assert isinstance(replacement, bytes)
 
 
-    # this cant handle binary files... or files with mixed newlines
-    if path.as_posix() == '/dev/stdin':
-        fh = sys.stdin.buffer
-        match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
-    else:
-        with open(path, 'rb') as fh:
-            match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
+    ## this cant handle binary files... or files with mixed newlines
+    #if path.as_posix() == '/dev/stdin':
+    #    fh = sys.stdin.buffer
+    #    match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
+    #else:
+    #    with open(path, 'rb') as fh:
+    #        match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
+
+    match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
 
     return match_count, modified
 
@@ -236,14 +238,15 @@ def replace_text(path: Path,
                  ):
 
     if isinstance(match, bytes):
-        match_count, modified = \
-            replace_text_bytes(path=path,
-                               match=match,
-                               replacement=replacement,
-                               temp_file=temp_file,
-                               verbose=verbose,
-                               debug=debug,
-                               )
+        assert False
+        #match_count, modified = \
+        #    replace_text_bytes(path=path,
+        #                       match=match,
+        #                       replacement=replacement,
+        #                       temp_file=temp_file,
+        #                       verbose=verbose,
+        #                       debug=debug,
+        #                       )
     else:
         match_count, modified = \
             replace_text_line(path=path,
@@ -421,16 +424,20 @@ def cli(ctx,
             eprint("matches:", match_count, path)
 
     else:   # matching on stdin
+        ic('stdin path')
         match = match.encode('utf8')
         if replacement:
             replacement = replacement.encode('utf8')
+        ic(match, replacement)
+
+        fh = sys.stdin.buffer
         match_count, modified = \
-            replace_text_bytes(path=Path('/dev/stdin'),
-                               match=match,
-                               replacement=replacement,
-                               temp_file=temp_file,
-                               verbose=verbose,
-                               debug=debug,)
+            iterate_over_fh(fh=fh,
+                            match=match,
+                            replacement=replacement,
+                            temp_file=temp_file,
+                            verbose=verbose,
+                            debug=debug,)
 
     temp_file_name = temp_file.name
     temp_file.close()
