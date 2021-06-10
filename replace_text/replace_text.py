@@ -443,7 +443,7 @@ def cli(ctx,
 
 
             if replacement is None:
-                ic(match_count, input_fh)
+                print(match_count, input_fh)
 
         return
 
@@ -461,7 +461,7 @@ def cli(ctx,
                                                 debug=debug,)
 
         if replacement is None:
-            ic(match_count, input_fh)
+            print(match_count, input_fh)
 
         return
 
