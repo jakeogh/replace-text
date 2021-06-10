@@ -91,7 +91,9 @@ def iterate_over_fh(input_fh,
     window = []
     window_size = len(match) # need to expand a matching block by an arb amount, replacement can be any size
 
-    ic(input_fh, output_fh)
+    if verbose:
+        ic(input_fh, output_fh)
+
     while True:
         # window starts off empty
         if verbose:
@@ -427,11 +429,13 @@ def cli(ctx,
                                                         verbose=verbose,
                                                         debug=debug,)
 
-            ic(output_fh)
+            if verbose:
+                ic(output_fh)
             output_fh.close()
 
             output_fh_path = output_fh.name
-            ic(output_fh_path)
+            if verbose:
+                ic(output_fh_path)
             if modified:
                 shutil.copystat(path, output_fh_path)
                 shutil.move(output_fh_path, path)
