@@ -263,6 +263,7 @@ def replace_text(path: Path,
 
 
 def get_thing(*,
+              utf8: bool,
               prompt: str,
               match: str,
               match_file: str,
@@ -277,18 +278,27 @@ def get_thing(*,
         raise ValueError('--{0} --{0}-file and --ask-{0} are mutually exclusive'.format(prompt))
     if match:
         assert len(match) > 0
-        result = match
+        if utf8:
+            result = match
+        else:
+            result = match.encode('utf8')
+
     if match_file:
         match_file = Path(match_file)
         with open(match_file.as_posix(), 'rb') as fh:
             file_bytes = fh.read()
         assert len(file_bytes) > 0
-        #result = file_bytes.decode('utf8')
-        result = file_bytes
+        if utf8:
+            result = file_bytes.decode('utf8')
+        else:
+            result = file_bytes
     if ask:
         match = input(prompt)
         assert len(match) > 0
-        result = match
+        if utf8:
+            result = match
+        else:
+            result = match.encode('utf8')
 
     if result:
         if verbose:
@@ -336,7 +346,8 @@ def cli(ctx,
         ask_replacement: bool,
         ):
 
-    match = get_thing(prompt='match',
+    match = get_thing(utf8=utf8,
+                      prompt='match',
                       match=match,
                       match_file=match_file,
                       ask=ask_match,
@@ -344,7 +355,8 @@ def cli(ctx,
                       debug=debug,)
 
     if (replacement or replacement_file or ask_replacement):
-        replacement = get_thing(prompt='replacement',
+        replacement = get_thing(utf8=utf8,
+                                prompt='replacement',
                                 match=replacement,
                                 match_file=replacement_file,
                                 ask=ask_replacement,
