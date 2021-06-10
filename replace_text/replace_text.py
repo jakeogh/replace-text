@@ -374,7 +374,6 @@ def cli(ctx,
                                      verbose=verbose,
                                      debug=debug,)
 
-
     if utf8:
         write_mode = 'w'
         read_mode = 'r'
@@ -448,7 +447,7 @@ def cli(ctx,
 
 
             if replacement is None:
-                eprint(match_count, input_fh)
+                ic(match_count, input_fh)
 
         return
 
@@ -466,7 +465,7 @@ def cli(ctx,
                                                 debug=debug,)
 
         if replacement is None:
-            eprint(match_count, input_fh)
+            ic(match_count, input_fh)
 
         return
 
