@@ -388,6 +388,12 @@ def cli(ctx,
     if not (files or paths):
         stdout = True
 
+    if stdout:
+        if utf8:
+            output_fh = sys.stdout
+        else:
+            output_fh = sys.stdout.buffer
+
     input_file_iterator = None
     if paths or files:
         input_file_iterator = iterate_input(iterator=files,
@@ -404,11 +410,6 @@ def cli(ctx,
                                             verbose=verbose,)
         for path in input_file_iterator:
             path = Path(path)
-            if stdout:
-                if utf8:
-                    output_fh = sys.stdout
-                else:
-                    output_fh = sys.stdout.buffer
 
             with open(path, read_mode) as input_fh:
                 match_count, modified = iterate_over_fh(input_fh=input_fh,
@@ -421,6 +422,21 @@ def cli(ctx,
 
 
         return
+
+    else:   # reading input on stdin to match against
+        if utf8:
+            input_fh = sys.stdout
+        else:
+            input_fh = sys.stdout.buffer
+
+        match_count, modified = iterate_over_fh(input_fh=input_fh,
+                                                match=match,
+                                                replacement=replacement,
+                                                output_fh=output_fh,
+                                                verbose=verbose,
+                                                debug=debug,)
+        return
+
 
 #    #    assert not paths    # need to iterate over files
 #
