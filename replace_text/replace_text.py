@@ -375,7 +375,6 @@ def cli(ctx,
                                      debug=debug,)
 
 
-
     if utf8:
         write_mode = 'w'
         read_mode = 'r'
@@ -443,6 +442,9 @@ def cli(ctx,
                 os.unlink(output_fh_path)
 
 
+            if replacement is None:
+                ic(match_count, input_fh)
+
         return
 
     else:   # reading input on stdin to match against
@@ -457,6 +459,10 @@ def cli(ctx,
                                                 output_fh=output_fh,
                                                 verbose=verbose,
                                                 debug=debug,)
+
+        if replacement is None:
+            ic(match_count, input_fh)
+
         return
 
 
