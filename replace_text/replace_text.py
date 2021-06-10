@@ -426,9 +426,9 @@ def cli(ctx,
 
     else:   # reading input on stdin to match against
         if utf8:
-            input_fh = sys.stdout
+            input_fh = sys.stdin
         else:
-            input_fh = sys.stdout.buffer
+            input_fh = sys.stdin.buffer
 
         match_count, modified = iterate_over_fh(input_fh=input_fh,
                                                 match=match,
