@@ -431,6 +431,7 @@ def cli(ctx,
             replacement = replacement.encode('utf8')
         ic(match, replacement)
         ic(temp_file)
+        ic(temp_file.mode)
         fh = sys.stdin.buffer
         match_count, modified = \
             iterate_over_fh(fh=fh,
