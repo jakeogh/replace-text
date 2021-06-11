@@ -456,7 +456,7 @@ def cli(ctx,
                 if verbose:
                     ic(match_count, input_fh)
                 if match_count > 0:
-                    sys.stdout.buffer.write(match_count)
+                    sys.stdout.buffer.write(str(match_count).encode('utf8'))
                     sys.stdout.buffer.write(input_fh)
                     sys.stdout.buffer.write(end)
                     #print(match_count, input_fh, end=end)
