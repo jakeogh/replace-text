@@ -348,6 +348,7 @@ def cli(ctx,
         ask_replacement: bool,
         ):
 
+
     match = get_thing(utf8=utf8,
                       prompt='match',
                       match=match,
@@ -401,6 +402,7 @@ def cli(ctx,
         output_fh = None    # just print match_count and file_name
 
     input_file_iterator = None
+    ic(files, match, replacement, match_file, replacement_file, utf8, printn, paths, stdout, ask_match, ask_replacement,)
     if paths or files:
         input_file_iterator = iterate_input(iterator=files,
                                             null=null,
