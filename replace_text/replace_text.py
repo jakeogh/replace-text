@@ -327,7 +327,7 @@ def get_thing(*,
 @click.option('--debug', is_flag=True)
 @click.option('--utf8', is_flag=True)
 @click.option('--printn', is_flag=True)
-@click.option('--paths', is_flag=True)
+@click.option('--match-stdin', is_flag=True)
 @click.option('--stdout', is_flag=True)
 @click.option('--ask-match', is_flag=True, help="escape from shell escaping")
 @click.option('--ask-replacement', is_flag=True, help="escape from shell escaping")
@@ -342,12 +342,13 @@ def cli(ctx,
         debug: bool,
         utf8: bool,
         printn: bool,
-        paths: bool,
+        match_stdin: bool,
         stdout: bool,
         ask_match: bool,
         ask_replacement: bool,
         ):
 
+    paths = not match_stdin
 
     match = get_thing(utf8=utf8,
                       prompt='match',
@@ -419,7 +420,6 @@ def cli(ctx,
         assert stdout
         for path in input_file_iterator:
             path = Path(path)
-            assert verbose
             if verbose:
                 ic(path)
 
