@@ -147,7 +147,6 @@ def iterate_over_fh(input_fh,
                 continue
             # here the window was full, but it did not match, so the window must be shifted by one byte, and the byte that fell off must be written
 
-
         assert len(window) <= len(match)
 
     if verbose:
@@ -421,6 +420,8 @@ def cli(ctx,
         assert stdout
         for path in input_file_iterator:
             path = Path(path)
+            if verbose:
+                ic(path)
 
             with open(path, read_mode) as input_fh:
                 if not output_fh:
