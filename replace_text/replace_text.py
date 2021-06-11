@@ -452,12 +452,14 @@ def cli(ctx,
                 else:
                     os.unlink(output_fh_path)
 
-
             if replacement is None:
                 if verbose:
                     ic(match_count, input_fh)
                 if match_count > 0:
-                    print(match_count, input_fh, end=end)
+                    sys.stdout.buffer.write(match_count)
+                    sys.stdout.buffer.write(input_fh)
+                    sys.stdout.buffer.write(end)
+                    #print(match_count, input_fh, end=end)
 
         return
 
