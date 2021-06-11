@@ -403,6 +403,7 @@ def cli(ctx,
         output_fh = None    # just print match_count and file_name
 
     input_file_iterator = None
+
     if verbose:
         ic(files, match, replacement, match_file, replacement_file, utf8, printn, paths, stdout, ask_match, ask_replacement,)
 
