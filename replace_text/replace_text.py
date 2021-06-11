@@ -426,12 +426,12 @@ def cli(ctx,
                 ic(path)
 
             with open(path, read_mode) as input_fh:
-                if not output_fh:
-                    if replacement:
-                        output_fh = tempfile.NamedTemporaryFile(mode=write_mode,
-                                                                prefix='tmp-replace_text-',
-                                                                dir='/tmp',
-                                                                delete=False)
+                #if not output_fh:
+                if replacement:
+                    output_fh = tempfile.NamedTemporaryFile(mode=write_mode,
+                                                            prefix='tmp-replace_text-',
+                                                            dir='/tmp',
+                                                            delete=False)
 
                 match_count, modified = iterate_over_fh(input_fh=input_fh,
                                                         match=match,
