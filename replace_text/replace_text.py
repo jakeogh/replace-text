@@ -313,6 +313,9 @@ def get_thing(*,
     raise ValueError('one of --{0} --{0}-file or --ask-{0} is required'.format(prompt))
 
 
+#        recursive: bool,
+#        recursive_dotfiles: bool,
+#        endswith: str,
 
 @click.command()
 @click.argument("files", nargs=-1, required=False)
@@ -338,9 +341,6 @@ def cli(ctx,
         replacement: str,
         match_file: str,
         replacement_file: str,
-        recursive: bool,
-        recursive_dotfiles: bool,
-        endswith: str,
         verbose: bool,
         debug: bool,
         utf8: bool,
@@ -420,6 +420,7 @@ def cli(ctx,
         assert stdout
         for path in input_file_iterator:
             path = Path(path)
+            assert verbose
             if verbose:
                 ic(path)
 
