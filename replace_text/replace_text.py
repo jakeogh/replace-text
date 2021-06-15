@@ -52,6 +52,18 @@ except ImportError:
     ic = eprint
 
 
+def remove_comments_from_bytes(line): #todo check for (assert <=1 line break) multiple linebreaks?
+    assert isinstance(line, bytes)
+    uncommented_line = b''
+    for char in line:
+        char = bytes([char])
+        if char != b'#':
+            uncommented_line += char
+        else:
+            break
+    return uncommented_line
+
+
 def is_regular_file(path):
     mode = os.stat(path, follow_symlinks=False)[stat.ST_MODE]
     if stat.S_ISREG(mode):
