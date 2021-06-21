@@ -422,7 +422,7 @@ def cli(ctx,
     if paths or files:
         input_file_iterator = iterate_input(iterator=files,
                                             null=null,
-                                            dont_decode=False,  # yield strs that get passed to Path()
+                                            dont_decode=True,  #  must iterate over bytes for null terminated input
                                             disable_stdin=disable_stdin,
                                             skip=None,
                                             head=None,
@@ -433,7 +433,7 @@ def cli(ctx,
                                             debug=debug,
                                             verbose=verbose,)
         for path in input_file_iterator:
-            path = Path(path)
+            path = Path(os.fsdecode(path))
             if verbose:
                 ic(path)
 
