@@ -36,6 +36,7 @@ from colorama import Fore
 from colorama import Style
 from enumerate_input import enumerate_input
 from enumerate_input import iterate_input
+from pathtool import get_file_size
 
 #note adding deps requires changes to sendgentoo
 
@@ -438,7 +439,6 @@ def cli(ctx,
                 ic(path)
 
             with open(path, read_mode) as input_fh:
-                #if not output_fh:
                 if replacement:
                     output_fh = tempfile.NamedTemporaryFile(mode=write_mode,
                                                             prefix='tmp-replace_text-',
@@ -461,6 +461,11 @@ def cli(ctx,
                 if verbose:
                     ic(output_fh_path)
                 if modified:
+                    bytes_difference = len(match) - len(replacement)
+                    ic(bytes_difference)
+                    input_file_size = get_file_size(path)
+                    output_file_size = get_file_size(output_fh_path)
+                    assert False
                     shutil.copystat(path, output_fh_path)
                     shutil.move(output_fh_path, path)
                 else:
