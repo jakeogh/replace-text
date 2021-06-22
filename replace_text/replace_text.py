@@ -124,7 +124,9 @@ def iterate_over_fh(*,
             # if len(window) == len(match)
             # then it's known that the window does not match
             assert b''.join(window) != match
-            output_fh.write(window)
+            window = b''.join(window)
+            if output_fh:
+                output_fh.write(window)
             break
 
         window.append(next_byte)
