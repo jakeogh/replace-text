@@ -89,7 +89,8 @@ def all_files_iter(p):
             yield sub.absolute()
 
 
-def iterate_over_fh(input_fh,
+def iterate_over_fh(*,
+                    input_fh,
                     match,
                     replacement,
                     output_fh,
@@ -156,11 +157,12 @@ def iterate_over_fh(input_fh,
                     if output_fh:
                         output_fh.write(window)  # flush the replacement to disk
                     window = []  # start a new window, dont want to match on the replacement
-
                 continue
-            # here the window was full, but it did not match, so the window must be shifted by one byte, and the byte that fell off must be written
 
-        assert len(window) <= len(match)
+            # here the window was full, but it did not match,
+            # so the window must be shifted by one byte, and the byte that fell off must be written
+
+        assert len(window) < len(match)
 
     if verbose:
         ic('broke', modified)
