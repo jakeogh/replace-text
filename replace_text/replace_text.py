@@ -136,6 +136,9 @@ def iterate_over_fh(*,
             window = window[1:]
             assert len(window) == window_size   # only time window_size is used
 
+
+        assert len(window) == len(match)
+
         # if it's possible to do a match, see if there is one
         if len(window) == len(match):
             #ic(len(window))
@@ -166,7 +169,8 @@ def iterate_over_fh(*,
 
 
         #assert len(window) <= len(match)  #
-        assert len(window) in [len(match), len(match) + 1]
+        #assert len(window) in [len(match), len(match) + 1]
+        assert len(window) == len(match)
 
     if verbose:
         ic('broke', modified)
