@@ -165,7 +165,8 @@ def iterate_over_fh(*,
             # so the window must be shifted by one byte, and the byte that fell off must be written
 
 
-        assert len(window) < len(match)
+        #assert len(window) <= len(match)  #
+        assert len(window) in [len(match), len(match) + 1]
 
     if verbose:
         ic('broke', modified)
