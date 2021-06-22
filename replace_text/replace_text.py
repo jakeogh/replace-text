@@ -481,11 +481,11 @@ def cli(ctx,
                 if modified:
                     bytes_difference = len(replacement) - len(match)
                     bytes_difference = bytes_difference * match_count
-                    ic(bytes_difference)
+                    #ic(bytes_difference)
                     input_file_size = get_file_size(path)
                     output_file_size = get_file_size(output_fh_path)
-                    ic(input_file_size)
-                    ic(output_file_size)
+                    #ic(input_file_size)
+                    #ic(output_file_size)
                     assert (input_file_size + bytes_difference) == output_file_size
                     shutil.copystat(path, output_fh_path)
                     shutil.move(output_fh_path, path)
