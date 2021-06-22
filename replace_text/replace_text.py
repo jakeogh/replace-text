@@ -480,6 +480,7 @@ def cli(ctx,
                     ic(output_fh_path)
                 if modified:
                     bytes_difference = len(replacement) - len(match)
+                    bytes_difference = bytes_difference * match_count
                     ic(bytes_difference)
                     input_file_size = get_file_size(path)
                     output_file_size = get_file_size(output_fh_path)
