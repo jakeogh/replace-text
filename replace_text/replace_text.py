@@ -117,7 +117,13 @@ def iterate_over_fh(*,
         if debug:
             ic(next_byte)
         if next_byte == b'':
-            break
+            if verbose:
+                ic('done iterating, cant break here must write remaining window')
+            #break
+            assert ((len(window) < len(match)) or (len(window) == len(match)))
+            # if len(window) == len(match)
+            # then it's known that the window does not match
+            assert b''.join(window) != match
 
         window.append(next_byte)
         location_read += 1
@@ -136,36 +142,32 @@ def iterate_over_fh(*,
             window = window[1:]
             assert len(window) == window_size   # only time window_size is used
 
-
         assert len(window) == len(match)
-
         # if it's possible to do a match, see if there is one
-        if len(window) == len(match):
-            #ic(len(window))
-            if debug:
-                print('\n')
-                eprint('match :', repr(match))
-                eprint('window:', repr(b''.join(window)))
-            #ic(window)
-            # if there is a match, we know the whole window gets replaced, =>< the current window
-            if b''.join(window) == match:
+        if debug:
+            print('\n')
+            eprint('match :', repr(match))
+            eprint('window:', repr(b''.join(window)))
+        #ic(window)
+        # if there is a match, we know the whole window gets replaced
+        if b''.join(window) == match:
+            if verbose:
+                ic('matched')
+            match_count += 1
+            if replacement:
+                window = replacement
                 if verbose:
-                    ic('matched')
-                match_count += 1
-                if replacement:
-                    window = replacement
-                    if verbose:
-                        ic(window)
-                    modified = True
-                    if output_fh:
-                        output_fh.write(window)  # flush the replacement to disk
-                    window = []  # start a new window, dont want to match on the replacement
-                continue
-            else:
-                ic(len(window), 'window was full, but didnt match')
+                    ic(window)
+                modified = True
+                if output_fh:
+                    output_fh.write(window)  # flush the replacement to disk
+                window = []  # start a new window, dont want to match on the replacement
+            continue
+        else:
+            ic(len(window), 'window was full, but didnt match')
 
-            # here the window was full, but it did not match,
-            # so the window must be shifted by one byte, and the byte that fell off must be written
+        # here the window was full, but it did not match,
+        # so the window must be shifted by one byte, and the byte that fell off must be written
 
 
         #assert len(window) <= len(match)  #
