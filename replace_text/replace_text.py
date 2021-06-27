@@ -400,6 +400,10 @@ def cli(ctx,
                                 verbose=verbose,
                                 debug=debug,)
 
+    if verbose:
+        ic(match)
+        ic(replacement)
+
     if match[-1] == '\n':
         if not replacement[-1] == '\n':
             eprint("WARNING: match ends in {} but replacement does not".format(match[-1]))
