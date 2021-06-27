@@ -89,6 +89,35 @@ def all_files_iter(p):
             yield sub.absolute()
 
 
+def append_unique_bytes_to_file(path: Path,
+                                bytes_to_append: bytes,
+                                verbose: bool,
+                                debug: bool,
+                                ) -> None:
+
+    assert isinstance(bytes_to_append, bytes)
+    match_count = None
+    path = Path(path).expanduser()
+    with open(path, 'rb') as input_fh:
+        match_count, modified = \
+            iterate_over_fh(input_fh=input_fh,
+                            match=bytes_to_append,
+                            replacement=None,
+                            output_fh=None,
+                            verbose=verbose,
+                            debug=debug,)
+
+        assert not modified
+
+    if verbose:
+        ic(path, match_count, modified)
+
+    if match_count == 0:
+        with open(path, 'ab') as input_fh:
+            input_fh.write(bytes_to_append)
+
+
+
 def iterate_over_fh(*,
                     input_fh,
                     match,
@@ -96,7 +125,7 @@ def iterate_over_fh(*,
                     output_fh,
                     verbose: bool,
                     debug: bool,
-                    ):
+                    ) -> tuple[int, bool]:
 
     modified = False
     location_read = 0
@@ -579,7 +608,7 @@ def cli(ctx,
 #                                           tail=None,
 #                                           debug=debug,
 #                                           verbose=verbose,):
-#            path = Path(path)
+#            path = Path(path).expanduser()
 #
 #            if verbose:
 #                ic(index, path)
