@@ -349,19 +349,20 @@ def get_thing(*,
 #        endswith: str,
 
 @click.command()
-@click.argument("files", nargs=-1, required=False)
-@click.option("--match", type=str)
-@click.option("--replacement", type=str)
+@click.argument("files", nargs=-1, required=False,)
+@click.option("--match", type=str,)
+@click.option("--replacement", type=str,)
 @click.option('--match-file', type=str)
-@click.option('--replacement-file', type=str)
-@click.option('--verbose', is_flag=True)
-@click.option('--debug', is_flag=True)
-@click.option('--utf8', is_flag=True)
-@click.option('--printn', is_flag=True)
-@click.option('--match-stdin', is_flag=True)
-@click.option('--stdout', is_flag=True)
-@click.option('--ask-match', is_flag=True, help="escape from shell escaping")
-@click.option('--ask-replacement', is_flag=True, help="escape from shell escaping")
+@click.option('--replacement-file', type=str,)
+@click.option('--verbose', is_flag=True,)
+@click.option('--debug', is_flag=True,)
+@click.option('--utf8', is_flag=True,)
+@click.option('--printn', is_flag=True,)
+@click.option('--match-stdin', is_flag=True,)
+@click.option('--stdout', is_flag=True,)
+@click.option('--ask-match', is_flag=True, help="escape from shell escaping",)
+@click.option('--ask-replacement', is_flag=True, help="escape from shell escaping",)
+@click.option('--disable-newline-check', is_flag=True,)
 @click.pass_context
 def cli(ctx,
         files,
@@ -377,6 +378,7 @@ def cli(ctx,
         stdout: bool,
         ask_match: bool,
         ask_replacement: bool,
+        disable_newline_check: bool,
         ):
 
     paths = not match_stdin
@@ -397,6 +399,13 @@ def cli(ctx,
                                 ask=ask_replacement,
                                 verbose=verbose,
                                 debug=debug,)
+
+    if match[-1] == '\n':
+        if not replacement[-1] == '\n':
+            eprint("WARNING: match ends in {} but replacement does not".format(match[-1]))
+            if not disable_newline_check:
+                eprint('use --disable-newline-check')
+                sys.exit(1)
 
     ctx.ensure_object(dict)
     null, end, verbose, debug = nevd(ctx=ctx,
