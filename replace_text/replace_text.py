@@ -404,8 +404,8 @@ def cli(ctx,
         ic(match)
         ic(replacement)
 
-    if match[-1] == '\n':
-        if not replacement[-1] == '\n':
+    if match[-1] == b'\n':
+        if not replacement[-1] == b'\n':
             eprint("WARNING: match ends in {} but replacement does not".format(match[-1]))
             if not disable_newline_check:
                 eprint('use --disable-newline-check')
