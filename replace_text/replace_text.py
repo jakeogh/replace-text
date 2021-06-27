@@ -502,6 +502,7 @@ def cli(ctx,
                     assert (input_file_size + bytes_difference) == output_file_size
                     shutil.copystat(path, output_fh_path)
                     shutil.move(output_fh_path, path)
+                    eprint(match_count, path.as_posix())
                 else:
                     os.unlink(output_fh_path)
 
