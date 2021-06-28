@@ -377,6 +377,71 @@ def get_thing(*,
 #        recursive_dotfiles: bool,
 #        endswith: str,
 
+
+def replace_text_in_file(path: Path,
+                         match,
+                         replacement,
+                         stdout: bool,
+                         end: bytes,
+                         read_mode: str,
+                         write_mode: str,
+                         verbose: bool,
+                         debug: bool,
+                         ) -> None:
+
+    path = Path(path).expanduser().resolve()
+    assert isinstance(stdout, bool)
+    assert isinstance(end, bytes)
+    assert isinstance(read_mode, str)
+    assert isinstance(write_mode, str)
+
+    with open(path, read_mode) as input_fh:
+        if replacement:
+            output_fh = tempfile.NamedTemporaryFile(mode=write_mode,
+                                                    prefix='tmp-replace_text-',
+                                                    dir='/tmp',
+                                                    delete=False)
+
+        match_count, modified = iterate_over_fh(input_fh=input_fh,
+                                                match=match,
+                                                replacement=replacement,
+                                                output_fh=output_fh,
+                                                verbose=verbose,
+                                                debug=debug,)
+
+    if verbose:
+        ic(output_fh)
+
+    if not stdout:
+        output_fh.close()
+        output_fh_path = output_fh.name
+        if verbose:
+            ic(output_fh_path)
+        if modified:
+            bytes_difference = len(replacement) - len(match)
+            bytes_difference = bytes_difference * match_count
+            #ic(bytes_difference)
+            input_file_size = get_file_size(path)
+            output_file_size = get_file_size(output_fh_path)
+            #ic(input_file_size)
+            #ic(output_file_size)
+            assert (input_file_size + bytes_difference) == output_file_size
+            shutil.copystat(path, output_fh_path)
+            shutil.move(output_fh_path, path)
+            eprint(match_count, path.as_posix())
+        else:
+            os.unlink(output_fh_path)
+
+    if replacement is None:
+        if verbose:
+            ic(match_count, input_fh)
+        if match_count > 0:
+            sys.stdout.buffer.write(str(match_count).encode('utf8') + b' ')
+            sys.stdout.buffer.write(str(input_fh.name).encode('utf8'))
+            sys.stdout.buffer.write(end)
+            #print(match_count, input_fh, end=end)
+
+
 @click.command()
 @click.argument("files", nargs=-1, required=False,)
 @click.option("--match", type=str,)
@@ -498,51 +563,15 @@ def cli(ctx,
             if verbose:
                 ic(path)
 
-            with open(path, read_mode) as input_fh:
-                if replacement:
-                    output_fh = tempfile.NamedTemporaryFile(mode=write_mode,
-                                                            prefix='tmp-replace_text-',
-                                                            dir='/tmp',
-                                                            delete=False)
-
-                match_count, modified = iterate_over_fh(input_fh=input_fh,
-                                                        match=match,
-                                                        replacement=replacement,
-                                                        output_fh=output_fh,
-                                                        verbose=verbose,
-                                                        debug=debug,)
-
-            if verbose:
-                ic(output_fh)
-
-            if not stdout:
-                output_fh.close()
-                output_fh_path = output_fh.name
-                if verbose:
-                    ic(output_fh_path)
-                if modified:
-                    bytes_difference = len(replacement) - len(match)
-                    bytes_difference = bytes_difference * match_count
-                    #ic(bytes_difference)
-                    input_file_size = get_file_size(path)
-                    output_file_size = get_file_size(output_fh_path)
-                    #ic(input_file_size)
-                    #ic(output_file_size)
-                    assert (input_file_size + bytes_difference) == output_file_size
-                    shutil.copystat(path, output_fh_path)
-                    shutil.move(output_fh_path, path)
-                    eprint(match_count, path.as_posix())
-                else:
-                    os.unlink(output_fh_path)
-
-            if replacement is None:
-                if verbose:
-                    ic(match_count, input_fh)
-                if match_count > 0:
-                    sys.stdout.buffer.write(str(match_count).encode('utf8') + b' ')
-                    sys.stdout.buffer.write(str(input_fh.name).encode('utf8'))
-                    sys.stdout.buffer.write(end)
-                    #print(match_count, input_fh, end=end)
+            replace_text_in_file(path=path,
+                                 match=match,
+                                 replacement=replacement,
+                                 stdout=stdout,
+                                 end=end,
+                                 read_mode=read_mode,
+                                 write_mode=write_mode,
+                                 verbose=verbose,
+                                 debug=debug,)
 
         return
 
