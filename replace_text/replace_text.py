@@ -556,7 +556,8 @@ def cli(ctx,
         stdout = True
 
     if paths and not replacement:
-        stdout = True
+        if not remove_match:
+            stdout = True
 
     output_fh = None
     if stdout:
