@@ -134,6 +134,11 @@ def iterate_over_fh(*,
     window = []
     window_size = len(match) # need to expand a matching block by an arb amount, replacement can be any size
 
+    #remove_match = False
+    #if replacement is not None:
+    #    if len(replacement) == 0:
+    #        remove_match = True
+
     if verbose:
         ic(input_fh, output_fh)
 
@@ -187,7 +192,7 @@ def iterate_over_fh(*,
             if verbose:
                 ic('matched')
             match_count += 1
-            if replacement:
+            if replacement is not None:
                 window = replacement
                 if verbose:
                     ic(window)
