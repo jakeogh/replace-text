@@ -515,7 +515,7 @@ def cli(ctx,
                                 debug=debug,)
 
     if remove_match:
-        replacement = ''
+        replacement = b''
 
     if verbose:
         ic(match)
