@@ -402,11 +402,11 @@ def replace_text_in_file(path: Path,
     assert isinstance(read_mode, str)
     assert isinstance(write_mode, str)
 
-    if replacement == '':
+    if replacement == b'':
         assert remove_match
 
     if remove_match:
-        assert replacement == ''
+        assert replacement == b''
 
     with open(path, read_mode) as input_fh:
         if replacement is not None:
