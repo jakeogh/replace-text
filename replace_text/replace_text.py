@@ -453,7 +453,7 @@ def replace_text_in_file(path: Path,
 @click.option("--replacement", type=str,)
 @click.option('--match-file', type=str)
 @click.option('--replacement-file', type=str,)
-@click.option('--remove-match', type=str,)
+@click.option('--remove-match', is_flag=True,)
 @click.option('--verbose', is_flag=True,)
 @click.option('--debug', is_flag=True,)
 @click.option('--utf8', is_flag=True,)
