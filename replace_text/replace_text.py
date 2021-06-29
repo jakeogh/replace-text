@@ -400,6 +400,9 @@ def replace_text_in_file(path: Path,
     if replacement == '':
         assert remove_match
 
+    if remove_match:
+        assert replacement == ''
+
     with open(path, read_mode) as input_fh:
         if replacement is not None:
             output_fh = tempfile.NamedTemporaryFile(mode=write_mode,
