@@ -358,7 +358,7 @@ def get_thing(*,
         else:
             result = file_bytes
     if ask:
-        match = input(prompt)
+        match = input(prompt + ': ')
         assert len(match) > 0
         if utf8:
             result = match
