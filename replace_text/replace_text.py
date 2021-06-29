@@ -386,6 +386,7 @@ def replace_text_in_file(path: Path,
                          end: bytes,
                          read_mode: str,
                          write_mode: str,
+                         remove_match: bool,
                          verbose: bool,
                          debug: bool,
                          ) -> None:
@@ -396,8 +397,11 @@ def replace_text_in_file(path: Path,
     assert isinstance(read_mode, str)
     assert isinstance(write_mode, str)
 
+    if replacement == '':
+        assert remove_match
+
     with open(path, read_mode) as input_fh:
-        if replacement:
+        if replacement is not None:
             output_fh = tempfile.NamedTemporaryFile(mode=write_mode,
                                                     prefix='tmp-replace_text-',
                                                     dir='/tmp',
@@ -449,6 +453,7 @@ def replace_text_in_file(path: Path,
 @click.option("--replacement", type=str,)
 @click.option('--match-file', type=str)
 @click.option('--replacement-file', type=str,)
+@click.option('--remove-match', type=str,)
 @click.option('--verbose', is_flag=True,)
 @click.option('--debug', is_flag=True,)
 @click.option('--utf8', is_flag=True,)
@@ -465,6 +470,7 @@ def cli(ctx,
         replacement: str,
         match_file: str,
         replacement_file: str,
+        remove_match: bool,
         verbose: bool,
         debug: bool,
         utf8: bool,
@@ -478,6 +484,7 @@ def cli(ctx,
 
     paths = not match_stdin
 
+
     match = get_thing(utf8=utf8,
                       prompt='match',
                       match=match,
@@ -487,6 +494,8 @@ def cli(ctx,
                       debug=debug,)
 
     if (replacement or replacement_file or ask_replacement):
+        if remove_match:
+            raise ValueError('--remove-match and --replacement* are mutually exclusive')
         replacement = get_thing(utf8=utf8,
                                 prompt='replacement',
                                 match=replacement,
@@ -572,6 +581,7 @@ def cli(ctx,
                                  end=end,
                                  read_mode=read_mode,
                                  write_mode=write_mode,
+                                 remove_match=remove_match,
                                  verbose=verbose,
                                  debug=debug,)
 
