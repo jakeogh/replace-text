@@ -197,7 +197,7 @@ def iterate_over_fh(*,
                 window = []  # start a new window, dont want to match on the replacement
             continue
         else:
-            if verbose:
+            if debug:
                 ic(len(window), 'window was full, but didnt match')
 
 
