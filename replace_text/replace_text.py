@@ -433,26 +433,30 @@ def replace_text_in_file(path: Path,
         if modified:
             bytes_difference = len(replacement) - len(match)
             bytes_difference = bytes_difference * match_count
-            #ic(bytes_difference)
+            if verbose:
+                ic(bytes_difference)
             input_file_size = get_file_size(path)
             output_file_size = get_file_size(output_fh_path)
-            #ic(input_file_size)
-            #ic(output_file_size)
+            if verbose:
+                ic(input_file_size)
+                ic(output_file_size)
             assert (input_file_size + bytes_difference) == output_file_size
             shutil.copystat(path, output_fh_path)
             shutil.move(output_fh_path, path)
             eprint(match_count, path.as_posix())
         else:
             os.unlink(output_fh_path)
+        return
 
-    if replacement is None:
-        if verbose:
-            ic(match_count, input_fh)
-        if match_count > 0:
-            sys.stdout.buffer.write(str(match_count).encode('utf8') + b' ')
-            sys.stdout.buffer.write(str(input_fh.name).encode('utf8'))
-            sys.stdout.buffer.write(end)
-            #print(match_count, input_fh, end=end)
+
+    #if replacement is None:
+    if verbose:
+        ic(match_count, input_fh)
+    if match_count > 0:
+        sys.stdout.buffer.write(str(match_count).encode('utf8') + b' ')
+        sys.stdout.buffer.write(str(input_fh.name).encode('utf8'))
+        sys.stdout.buffer.write(end)
+        #print(match_count, input_fh, end=end)
 
 
 @click.command()
