@@ -499,6 +499,8 @@ def cli(ctx,
     if (replacement or replacement_file or ask_replacement):
         if remove_match:
             raise ValueError('--remove-match and --replacement* are mutually exclusive')
+
+    if (replacement or replacement_file or ask_replacement):
         replacement = get_thing(utf8=utf8,
                                 prompt='replacement',
                                 match=replacement,
@@ -506,6 +508,9 @@ def cli(ctx,
                                 ask=ask_replacement,
                                 verbose=verbose,
                                 debug=debug,)
+
+    if remove_match:
+        replacement = ''
 
     if verbose:
         ic(match)
