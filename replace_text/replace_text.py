@@ -423,7 +423,8 @@ def replace_text_in_file(path: Path,
                                                 debug=debug,)
 
     if verbose:
-        ic(output_fh)
+        ic(stdout)
+        ic(match_count, output_fh)
 
     if not stdout:
         output_fh.close()
