@@ -560,7 +560,7 @@ def cli(ctx,
         else:
             output_fh = sys.stdout.buffer
 
-    if not replacement:
+    if replacement is None:
         output_fh = None    # just print match_count and file_name
 
     input_file_iterator = None
