@@ -29,6 +29,8 @@ from pathlib import Path
 
 #from icecream import ic  # too many deps
 import click
+from asserttool import eprint
+from asserttool import ic
 from asserttool import maxone
 from asserttool import nevd
 from asserttool import nl_iff_tty
@@ -39,18 +41,6 @@ from enumerate_input import iterate_input
 from pathtool import get_file_size
 
 #note adding deps requires changes to sendgentoo
-
-
-def eprint(*args, **kwargs):
-    if 'file' in kwargs.keys():
-        kwargs.pop('file')
-    print(*args, file=sys.stderr, **kwargs)
-
-
-try:
-    from icecream import ic  # https://github.com/gruns/icecream
-except ImportError:
-    ic = eprint
 
 
 def remove_comments_from_bytes(line): #todo check for (assert <=1 line break) multiple linebreaks?
