@@ -25,18 +25,20 @@ import shutil
 import stat
 import sys
 import tempfile
+from math import inf
 from pathlib import Path
 
 #from icecream import ic  # too many deps
 import click
+#from asserttool import nevd
+#from asserttool import nl_iff_tty
 from asserttool import eprint
 from asserttool import ic
 from asserttool import maxone
-from asserttool import nevd
-from asserttool import nl_iff_tty
+from asserttool import tv
 from colorama import Fore
 from colorama import Style
-from enumerate_input import enumerate_input
+#from enumerate_input import enumerate_input
 from enumerate_input import iterate_input
 from pathtool import get_file_size
 
@@ -81,8 +83,7 @@ def all_files_iter(p):
 
 def append_unique_bytes_to_file(path: Path,
                                 bytes_to_append: bytes,
-                                verbose: bool,
-                                debug: bool,
+                                verbose: int,
                                 ) -> None:
 
     assert isinstance(bytes_to_append, bytes)
@@ -95,7 +96,7 @@ def append_unique_bytes_to_file(path: Path,
                             replacement=None,
                             output_fh=None,
                             verbose=verbose,
-                            debug=debug,)
+                            )
 
         assert not modified
 
@@ -113,8 +114,7 @@ def iterate_over_fh(*,
                     match,
                     replacement,
                     output_fh,
-                    verbose: bool,
-                    debug: bool,
+                    verbose: int,
                     ) -> tuple[int, bool]:
 
     modified = False
@@ -134,11 +134,11 @@ def iterate_over_fh(*,
 
     while True:
         # window starts off empty
-        if debug:
+        if verbose == inf:
             ic(len(match), len(window), location_read)
         #fh.seek(location_read)  # unecessary
         next_byte = input_fh.read(1)
-        if debug:
+        if verbose == inf:
             ic(next_byte)
         if next_byte == b'':
             if verbose:
@@ -172,7 +172,7 @@ def iterate_over_fh(*,
 
         assert len(window) == len(match)
         # if it's possible to do a match, see if there is one
-        if debug:
+        if verbose == inf:
             print('\n')
             eprint('match :', repr(match))
             eprint('window:', repr(b''.join(window)))
@@ -192,7 +192,7 @@ def iterate_over_fh(*,
                 window = []  # start a new window, dont want to match on the replacement
             continue
         else:
-            if debug:
+            if verbose == inf:
                 ic(len(window), 'window was full, but didnt match')
 
 
@@ -215,8 +215,7 @@ def replace_text_line(*,
                       match: str,
                       replacement: str,
                       temp_file,
-                      verbose: bool,
-                      debug: bool,
+                      verbose: int,
                       ):
 
     match_count = 0
@@ -264,8 +263,7 @@ def replace_text_line(*,
 #                       match: bytes,
 #                       replacement: bytes,
 #                       temp_file,
-#                       verbose: bool,
-#                       debug: bool,
+#                       verbose: int,
 #                       ):
 #
 #    #assert isinstance(path, Path)
@@ -280,12 +278,12 @@ def replace_text_line(*,
 #    ## this cant handle binary files... or files with mixed newlines
 #    #if path.as_posix() == '/dev/stdin':
 #    #    fh = sys.stdin.buffer
-#    #    match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
+#    #    match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose)
 #    #else:
 #    #    with open(path, 'rb') as fh:
-#    #        match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
+#    #        match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose)
 #
-#    match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose, debug)
+#    match_count, modified = iterate_over_fh(fh, match, replacement, temp_file, verbose)
 #
 #    return match_count, modified
 
@@ -294,8 +292,7 @@ def replace_text(path: Path,
                  match,
                  replacement,
                  temp_file,
-                 verbose: bool,
-                 debug: bool,
+                 verbose: int,
                  ):
 
     if isinstance(match, bytes):
@@ -306,7 +303,6 @@ def replace_text(path: Path,
         #                       replacement=replacement,
         #                       temp_file=temp_file,
         #                       verbose=verbose,
-        #                       debug=debug,
         #                       )
     else:
         match_count, modified = \
@@ -315,7 +311,6 @@ def replace_text(path: Path,
                               replacement=replacement,
                               temp_file=temp_file,
                               verbose=verbose,
-                              debug=debug,
                               )
 
 
@@ -328,8 +323,7 @@ def get_thing(*,
               match: str,
               match_file: str,
               ask: bool,
-              verbose: bool,
-              debug: bool,
+              verbose: int,
               ):
 
     result = None
@@ -378,17 +372,14 @@ def replace_text_in_file(path: Path,
                          replacement,
                          output_fh,
                          stdout: bool,
-                         end: bytes,
                          read_mode: str,
                          write_mode: str,
                          remove_match: bool,
-                         verbose: bool,
-                         debug: bool,
+                         verbose: int,
                          ) -> None:
 
     path = Path(path).expanduser().resolve()
     assert isinstance(stdout, bool)
-    assert isinstance(end, bytes)
     assert isinstance(read_mode, str)
     assert isinstance(write_mode, str)
 
@@ -410,7 +401,7 @@ def replace_text_in_file(path: Path,
                                                 replacement=replacement,
                                                 output_fh=output_fh,
                                                 verbose=verbose,
-                                                debug=debug,)
+                                                )
 
     if verbose:
         ic(stdout)
@@ -446,8 +437,7 @@ def replace_text_in_file(path: Path,
     if match_count > 0:
         sys.stdout.buffer.write(str(match_count).encode('utf8') + b' ')
         sys.stdout.buffer.write(str(input_fh.name).encode('utf8'))
-        sys.stdout.buffer.write(end)
-        #print(match_count, input_fh, end=end)
+        sys.stdout.buffer.write(b'\n')
 
 
 @click.command()
@@ -457,8 +447,8 @@ def replace_text_in_file(path: Path,
 @click.option('--match-file', type=str)
 @click.option('--replacement-file', type=str,)
 @click.option('--remove-match', is_flag=True,)
-@click.option('--verbose', is_flag=True,)
-@click.option('--debug', is_flag=True,)
+@click.option('--verbose', count=True,)
+@click.option('--verbose-inf', is_flag=True,)
 @click.option('--utf8', is_flag=True,)
 @click.option('--printn', is_flag=True,)
 @click.option('--match-stdin', is_flag=True,)
@@ -474,8 +464,8 @@ def cli(ctx,
         match_file: str,
         replacement_file: str,
         remove_match: bool,
-        verbose: bool,
-        debug: bool,
+        verbose: int,
+        verbose_inf: bool,
         utf8: bool,
         printn: bool,
         match_stdin: bool,
@@ -487,14 +477,13 @@ def cli(ctx,
 
     paths = not match_stdin
 
-
     match = get_thing(utf8=utf8,
                       prompt='match',
                       match=match,
                       match_file=match_file,
                       ask=ask_match,
                       verbose=verbose,
-                      debug=debug,)
+                      )
 
     if (replacement or replacement_file or ask_replacement):
         if remove_match:
@@ -507,7 +496,7 @@ def cli(ctx,
                                 match_file=replacement_file,
                                 ask=ask_replacement,
                                 verbose=verbose,
-                                debug=debug,)
+                                )
 
     if remove_match:
         replacement = b''
@@ -524,11 +513,10 @@ def cli(ctx,
                 sys.exit(1)
 
     ctx.ensure_object(dict)
-    null, end, verbose, debug = nevd(ctx=ctx,
-                                     printn=printn,
-                                     ipython=False,
-                                     verbose=verbose,
-                                     debug=debug,)
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
 
     if utf8:
         write_mode = 'w'
@@ -566,7 +554,7 @@ def cli(ctx,
 
     if paths or files:
         input_file_iterator = iterate_input(iterator=files,
-                                            null=null,
+                                            null=b'\0',
                                             dont_decode=True,  #  must iterate over bytes for null terminated input
                                             disable_stdin=disable_stdin,
                                             skip=None,
@@ -575,7 +563,6 @@ def cli(ctx,
                                             random=False,
                                             loop=None,
                                             input_filter_function=None,
-                                            debug=debug,
                                             verbose=verbose,)
         for path in input_file_iterator:
             path = Path(os.fsdecode(path))
@@ -587,12 +574,11 @@ def cli(ctx,
                                  replacement=replacement,
                                  output_fh=output_fh,
                                  stdout=stdout,
-                                 end=end,
                                  read_mode=read_mode,
                                  write_mode=write_mode,
                                  remove_match=remove_match,
                                  verbose=verbose,
-                                 debug=debug,)
+                                 )
 
         return
 
@@ -607,13 +593,13 @@ def cli(ctx,
                                                 replacement=replacement,
                                                 output_fh=output_fh,
                                                 verbose=verbose,
-                                                debug=debug,)
+                                                )
 
         if replacement is None:
             if verbose:
                 ic(match_count, input_fh)
             if match_count > 0:
-                print(match_count, input_fh, end=end)
+                print(match_count, input_fh)
 
         return
 
@@ -656,7 +642,6 @@ def cli(ctx,
 #                                           skip=None,
 #                                           head=None,
 #                                           tail=None,
-#                                           debug=debug,
 #                                           verbose=verbose,):
 #            path = Path(path).expanduser()
 #
@@ -689,7 +674,7 @@ def cli(ctx,
 #                                         replacement=replacement,
 #                                         temp_file=temp_file,
 #                                         verbose=verbose,
-#                                         debug=debug,)
+#                                         )
 #
 #            else:
 #                if is_regular_file(path):
@@ -700,7 +685,7 @@ def cli(ctx,
 #                                         replacement=replacement,
 #                                         temp_file=temp_file,
 #                                         verbose=verbose,
-#                                         debug=debug,)
+#                                         )
 #                    except UnicodeDecodeError:
 #                        pass
 #
@@ -726,7 +711,7 @@ def cli(ctx,
 #                            replacement=replacement,
 #                            temp_file=temp_file,
 #                            verbose=verbose,
-#                            debug=debug,)
+#                            )
 #
 #    temp_file_name = temp_file.name
 #    temp_file.close()
