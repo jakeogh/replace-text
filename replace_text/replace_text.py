@@ -119,7 +119,7 @@ def iterate_over_fh(*,
                     ) -> tuple[int, bool]:
 
     assert isinstance(match, bytes)
-    if replacement:
+    if replacement is not None:
         assert isinstance(replacement, bytes)
     modified = False
     location_read = 0
