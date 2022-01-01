@@ -482,6 +482,7 @@ def cli(ctx,
         disable_newline_check: bool,
         ):
 
+    ic(replacement)
     if replacement is not None:
         replacement = replacement.encode('utf8')
 
@@ -509,6 +510,7 @@ def cli(ctx,
                                 )
 
     if remove_match:
+        assert replacement is None
         replacement = b''
 
     if verbose:
