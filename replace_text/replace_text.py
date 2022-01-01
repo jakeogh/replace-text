@@ -27,6 +27,7 @@ import sys
 import tempfile
 from math import inf
 from pathlib import Path
+from typing import Optional
 
 #from icecream import ic  # too many deps
 import click
@@ -111,12 +112,15 @@ def append_unique_bytes_to_file(path: Path,
 
 def iterate_over_fh(*,
                     input_fh,
-                    match,
-                    replacement,
+                    match: bytes,
+                    replacement: Optional[bytes],
                     output_fh,
                     verbose: int,
                     ) -> tuple[int, bool]:
 
+    assert isinstance(match, bytes)
+    if replacement:
+        assert isinstance(replacement, bytes)
     modified = False
     location_read = 0
     match_count = 0
