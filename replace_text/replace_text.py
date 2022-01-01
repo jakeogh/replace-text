@@ -372,8 +372,8 @@ def get_thing(*,
 
 
 def replace_text_in_file(path: Path,
-                         match,
-                         replacement,
+                         match: bytes,
+                         replacement: Optional[bytes],
                          output_fh,
                          stdout: bool,
                          read_mode: str,
@@ -384,6 +384,9 @@ def replace_text_in_file(path: Path,
 
     path = Path(path).expanduser().resolve()
     assert isinstance(stdout, bool)
+    assert isinstance(match, bytes)
+    if replacement is not None:
+        assert isinstance(replacement, bytes)
     assert isinstance(read_mode, str)
     assert isinstance(write_mode, str)
 
@@ -478,6 +481,9 @@ def cli(ctx,
         ask_replacement: bool,
         disable_newline_check: bool,
         ):
+
+    if replacement is not None:
+        replacement = replacement.encode('utf8')
 
     paths = not match_stdin
 
