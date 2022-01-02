@@ -482,7 +482,7 @@ def cli(ctx,
         disable_newline_check: bool,
         ):
 
-    ic(replacement)
+    #ic(replacement)
     if replacement is not None:
         replacement = replacement.encode('utf8')
 
