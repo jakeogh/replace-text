@@ -37,9 +37,8 @@ from asserttool import eprint
 from asserttool import ic
 from asserttool import maxone
 from asserttool import tv
-from colorama import Fore
-from colorama import Style
-#from enumerate_input import enumerate_input
+#from colorama import Fore
+#from colorama import Style
 from enumerate_input import iterate_input
 from pathtool import get_file_size
 
