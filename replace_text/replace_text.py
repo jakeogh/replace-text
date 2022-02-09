@@ -445,7 +445,7 @@ def replace_text_in_file(path: Path,
 
 @click.command()
 @click.argument("files", nargs=-1, required=False,)
-@click.option("--match", type=str,)
+@click.option("--match", 'match_str', type=str,)
 @click.option("--replacement", type=str,)
 @click.option('--match-file', type=str)
 @click.option('--replacement-file', type=str,)
@@ -462,7 +462,7 @@ def replace_text_in_file(path: Path,
 @click.pass_context
 def cli(ctx,
         files,
-        match: str,
+        match_str: str,
         replacement: str,
         match_file: str,
         replacement_file: str,
@@ -482,7 +482,10 @@ def cli(ctx,
     if replacement is not None:
         replacement = replacement.encode('utf8')
 
-    bytes_to_match = match.decode('utf8')
+    if match_str:
+        bytes_to_match = match_str.decode('utf8')
+    else:
+        bytes_to_match = None
     paths = not match_stdin
 
     bytes_to_match = get_thing(utf8=utf8,
