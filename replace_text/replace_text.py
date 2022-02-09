@@ -462,7 +462,7 @@ def replace_text_in_file(path: Path,
 @click.pass_context
 def cli(ctx,
         files,
-        bytes_to_match: str,
+        match: str,
         replacement: str,
         match_file: str,
         replacement_file: str,
@@ -482,6 +482,7 @@ def cli(ctx,
     if replacement is not None:
         replacement = replacement.encode('utf8')
 
+    bytes_to_match = match.decode('utf8')
     paths = not match_stdin
 
     bytes_to_match = get_thing(utf8=utf8,
