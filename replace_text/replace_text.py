@@ -444,7 +444,6 @@ def replace_text_in_file(path: Path,
 @click.option('--verbose', count=True,)
 @click.option('--verbose-inf', is_flag=True,)
 @click.option('--utf8', is_flag=True,)
-@click.option('--printn', is_flag=True,)
 @click.option('--match-stdin', is_flag=True,)
 @click.option('--stdout', is_flag=True,)
 @click.option('--ask-match', is_flag=True, help="escape from shell escaping",)
