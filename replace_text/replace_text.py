@@ -141,7 +141,7 @@ def iterate_over_fh(*,
         if verbose == inf:
             ic(next_byte)
         if next_byte == b'':
-            if verbose:
+            if verbose == inf:
                 ic('done iterating, cant break here must write remaining window')
             #break
             assert ((len(window) < len(bytes_to_match)) or (len(window) == len(bytes_to_match)))
@@ -355,7 +355,7 @@ def get_thing(*,
             result = bytes_to_match.encode('utf8')
 
     if result:
-        if verbose:
+        if verbose == inf:
             ic(result)
         return result
 
