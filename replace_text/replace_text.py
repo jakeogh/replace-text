@@ -435,7 +435,7 @@ def replace_text_in_file(path: Path,
 
 
 @click.command()
-@click.argument("files", nargs=-1, required=False,)
+@click.argument("paths", nargs=-1)
 @click.option("--match", 'match_str', type=str,)
 @click.option("--replacement", type=str,)
 @click.option('--match-file', type=str)
@@ -452,7 +452,7 @@ def replace_text_in_file(path: Path,
 @click.option('--disable-newline-check', is_flag=True,)
 @click.pass_context
 def cli(ctx,
-        files,
+        paths: tuple[str],
         match_str: str,
         replacement: str,
         match_file: str,
@@ -461,13 +461,16 @@ def cli(ctx,
         verbose: int,
         verbose_inf: bool,
         utf8: bool,
-        printn: bool,
-        match_stdin: bool,
         stdout: bool,
         ask_match: bool,
         ask_replacement: bool,
         disable_newline_check: bool,
         ):
+
+    tty, verbose = tv(ctx=ctx,
+                      verbose=verbose,
+                      verbose_inf=verbose_inf,
+                      )
 
     #ic(replacement)
     if replacement is not None:
@@ -477,15 +480,14 @@ def cli(ctx,
         bytes_to_match = match_str.decode('utf8')
     else:
         bytes_to_match = None
-    paths = not match_stdin
 
     bytes_to_match = get_thing(utf8=utf8,
-                      prompt='match',
-                      bytes_to_match=bytes_to_match,
-                      match_file=match_file,
-                      ask=ask_match,
-                      verbose=verbose,
-                      )
+                               prompt='match',
+                               bytes_to_match=bytes_to_match,
+                               match_file=match_file,
+                               ask=ask_match,
+                               verbose=verbose,
+                               )
 
     if (replacement or replacement_file or ask_replacement):
         if remove_match:
@@ -514,12 +516,6 @@ def cli(ctx,
                 eprint('use --disable-newline-check')
                 sys.exit(1)
 
-    ctx.ensure_object(dict)
-    tty, verbose = tv(ctx=ctx,
-                      verbose=verbose,
-                      verbose_inf=verbose_inf,
-                      )
-
     if utf8:
         write_mode = 'w'
         read_mode = 'r'
@@ -529,10 +525,10 @@ def cli(ctx,
 
     #if files:   # got files on command line, shouldnt be expeecting input on stdin
     disable_stdin = False
-    if files:
+    if paths:
         disable_stdin = True
 
-    if not (files or paths):
+    if not paths:
         stdout = True
 
     if paths and not replacement:
@@ -552,10 +548,10 @@ def cli(ctx,
     input_file_iterator = None
 
     if verbose:
-        ic(files, bytes_to_match, replacement, match_file, replacement_file, utf8, printn, paths, stdout, ask_match, ask_replacement,)
+        ic(paths, bytes_to_match, replacement, match_file, replacement_file, utf8, stdout, ask_match, ask_replacement,)
 
-    if paths or files:
-        input_file_iterator = iterate_input(iterator=files,
+    if paths:
+        input_file_iterator = iterate_input(iterator=paths,
                                             null=b'\0',
                                             dont_decode=True,  #  must iterate over bytes for null terminated input
                                             disable_stdin=disable_stdin,
@@ -606,119 +602,3 @@ def cli(ctx,
         return
 
 
-#    #    assert not paths    # need to iterate over files
-#
-#    if not (paths or files):
-#        # read bytes from stdin and look for matches
-#        if utf8:
-#            input_fh = sys.stdin
-#        else:
-#            input_fh = sys.stdin.buffer
-#
-#    ic(utf8, read_mode, write_mode, input_fh, )
-#
-#
-#
-#
-#
-#
-#
-#    #path_basename = os.path.basename(path)
-#    #path_dir = os.path.dirname(path)
-#    mode = 'w'
-#    if isinstance(bytes_to_match, bytes):
-#        mode = 'wb'
-#    ic(mode)
-#    temp_file = tempfile.NamedTemporaryFile(mode=mode,
-#                                            prefix='tmp-',
-#                                            dir='/tmp',
-#                                            delete=False)
-#
-#    match_count = 0
-#    iterator = files
-#
-#    if paths:
-#        for index, path in enumerate_input(iterator=iterator,
-#                                           null=null,
-#                                           progress=False,
-#                                           skip=None,
-#                                           head=None,
-#                                           tail=None,
-#                                           verbose=verbose,):
-#            path = Path(path).expanduser()
-#
-#            if verbose:
-#                ic(index, path)
-#
-#            path = Path(path).resolve()
-#            if verbose:
-#                ic(path)
-#            if endswith:
-#                if not path.endswith(endswith):
-#                    continue
-#            if os.path.isdir(path):
-#                if not recursive:
-#                    print("Warning: skipping folder:",
-#                          path,
-#                          "specify --recursive to decend into it.", file=sys.stderr)
-#                    continue
-#
-#                for sub_file in all_files_iter(path):
-#                    if is_regular_file(sub_file):
-#                        if '.' in os.fsdecode(sub_file.parent):
-#                            if not recursive_dotfiles:
-#                                if verbose:
-#                                    eprint("skipping:", sub_file, "due to dot '.' in parent")
-#                                continue
-#                        match_count, modified = \
-#                            replace_text(path=Path(sub_file),
-#                                         bytes_to_match=bytes_to_match,
-#                                         replacement=replacement,
-#                                         temp_file=temp_file,
-#                                         verbose=verbose,
-#                                         )
-#
-#            else:
-#                if is_regular_file(path):
-#                    try:
-#                        match_count, modified = \
-#                            replace_text(path=Path(path),
-#                                         bytes_to_match=bytes_to_match,
-#                                         replacement=replacement,
-#                                         temp_file=temp_file,
-#                                         verbose=verbose,
-#                                         )
-#                    except UnicodeDecodeError:
-#                        pass
-#
-#            eprint("matches:", match_count, path)
-#
-#    else:   # matching on stdin
-#        ic('stdin path')
-#        bytes_to_match = bytes_to_match.encode('utf8')
-#        if replacement:
-#            replacement = replacement.encode('utf8')
-#        ic(bytes_to_match, replacement)
-#        mode='wb'
-#        temp_file = tempfile.NamedTemporaryFile(mode=mode,
-#                                                prefix='tmp-',
-#                                                dir='/tmp',
-#                                                delete=False)
-#        ic(temp_file)
-#        ic(temp_file.mode)
-#        fh = sys.stdin.buffer
-#        match_count, modified = \
-#            iterate_over_fh(fh=fh,
-#                            bytes_to_match=bytes_to_match,
-#                            replacement=replacement,
-#                            temp_file=temp_file,
-#                            verbose=verbose,
-#                            )
-#
-#    temp_file_name = temp_file.name
-#    temp_file.close()
-#    if modified:
-#        shutil.copystat(path, temp_file_name)
-#        shutil.move(temp_file_name, path)
-#    else:
-#        os.unlink(temp_file_name)
