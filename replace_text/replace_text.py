@@ -513,8 +513,7 @@ def cli(ctx,
         replacement = b''
 
     if verbose:
-        ic(bytes_to_match)
-        ic(replacement)
+        ic(bytes_to_match, replacement)
 
     if bytes_to_match[-1] == b'\n':
         if not replacement[-1] == b'\n':
