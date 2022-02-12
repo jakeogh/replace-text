@@ -204,7 +204,7 @@ def iterate_over_fh(*,
         #assert len(window) in [len(bytes_to_match), len(bytes_to_match) + 1]
         assert len(window) == len(bytes_to_match)
 
-    if verbose:
+    if verbose == inf:
         ic('broke', modified)
 
     return match_count, modified
