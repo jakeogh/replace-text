@@ -562,7 +562,7 @@ def cli(ctx,
                                             verbose=verbose,)
         for path in input_file_iterator:
             path = Path(os.fsdecode(path))
-            if verbose:
+            if verbose == inf:
                 ic(path)
 
             replace_text_in_file(path=path,
