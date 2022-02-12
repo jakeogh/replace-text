@@ -475,7 +475,7 @@ def cli(ctx,
         replacement = replacement.encode('utf8')
 
     if match_str:
-        bytes_to_match = match_str.decode('utf8')
+        bytes_to_match = match_str.encode('utf8')
     else:
         bytes_to_match = None
 
