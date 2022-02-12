@@ -120,16 +120,10 @@ def iterate_over_fh(*,
     modified = False
     location_read = 0
     match_count = 0
-    #location_write = 0
     window = []
     window_size = len(bytes_to_match) # need to expand a matching block by an arb amount, replacement can be any size
 
-    #remove_match = False
-    #if replacement is not None:
-    #    if len(replacement) == 0:
-    #        remove_match = True
-
-    if verbose:
+    if verbose == inf:
         ic(input_fh, output_fh)
 
     while True:
@@ -145,8 +139,6 @@ def iterate_over_fh(*,
                 ic('done iterating, cant break here must write remaining window')
             #break
             assert ((len(window) < len(bytes_to_match)) or (len(window) == len(bytes_to_match)))
-            # if len(window) == len(bytes_to_match)
-            # then it's known that the window does not match
             assert b''.join(window) != bytes_to_match
             window = b''.join(window)
             if output_fh:
