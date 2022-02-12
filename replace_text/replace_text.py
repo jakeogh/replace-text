@@ -404,16 +404,16 @@ def replace_text_in_file(path: Path,
     if not stdout:
         output_fh.close()
         output_fh_path = output_fh.name
-        if verbose:
+        if verbose == inf:
             ic(output_fh_path)
         if modified:
             bytes_difference = len(replacement) - len(bytes_to_match)
             bytes_difference = bytes_difference * match_count
-            if verbose:
+            if verbose == inf:
                 ic(bytes_difference)
             input_file_size = get_file_size(path)
             output_file_size = get_file_size(output_fh_path)
-            if verbose:
+            if verbose == inf:
                 ic(input_file_size)
                 ic(output_file_size)
             assert (input_file_size + bytes_difference) == output_file_size
