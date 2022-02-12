@@ -43,7 +43,7 @@ from pathtool import get_file_size
 #note adding deps requires changes to sendgentoo
 
 
-def remove_comments_from_bytes(line): #todo check for (assert <=1 line break) multiple linebreaks?
+def remove_comments_from_bytes(line) -> bytes: #todo check for (assert <=1 line break) multiple linebreaks?
     assert isinstance(line, bytes)
     uncommented_line = b''
     for char in line:
@@ -406,9 +406,8 @@ def replace_text_in_file(path: Path,
                                                 verbose=verbose,
                                                 )
 
-    if verbose:
-        ic(stdout)
-        ic(match_count, output_fh)
+    if verbose == inf:
+        ic(stdout, match_count, output_fh)
 
     if not stdout:
         output_fh.close()
