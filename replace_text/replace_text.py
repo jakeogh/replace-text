@@ -31,13 +31,13 @@ from typing import Optional
 
 #from icecream import ic  # too many deps
 import click
-from asserttool import eprint
 from asserttool import ic
 from asserttool import maxone
-from asserttool import tv
+from clicktool import tv
 #from colorama import Fore
 #from colorama import Style
 from enumerate_input import iterate_input
+from eprint import eprint
 from pathtool import get_file_size
 
 #note adding deps requires changes to sendgentoo
@@ -598,5 +598,3 @@ def cli(ctx,
                 print(match_count, input_fh)
 
         return
-
-
