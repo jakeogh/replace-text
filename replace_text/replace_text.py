@@ -518,9 +518,11 @@ def cli(
     )
 
     # ic(replacement)
+    replacement_bytes = None
     if replacement_str is not None:
         replacement_bytes = replacement_str.encode("utf8")
 
+    match_bytes = None
     if match_str:
         match_bytes = match_str.encode("utf8")
     else:
