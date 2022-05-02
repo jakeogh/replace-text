@@ -125,7 +125,7 @@ def iterate_over_fh(
     modified = False
     location_read = 0
     match_count = 0
-    window = []
+    window: list[bytes] = []
     window_size = len(
         match_bytes
     )  # need to expand a matching block by an arb amount, replacement_bytes can be any size
@@ -146,10 +146,10 @@ def iterate_over_fh(
                 ic("done iterating, cant break here must write remaining window")
             # break
             assert (len(window) < len(match_bytes)) or (len(window) == len(match_bytes))
-            assert b"".join(window) != match_bytes
-            window = b"".join(window)
+            _window = b"".join(window)
+            assert _window != match_bytes  # bug the last window may match
             if output_fh:
-                output_fh.write(window)
+                output_fh.write(_window)
             break
 
         window.append(next_byte)
@@ -174,7 +174,7 @@ def iterate_over_fh(
         if verbose == inf:
             print("\n")
             eprint("match_bytes :", repr(match_bytes))
-            eprint("window:", repr(b"".join(window)))
+            eprint("window:      ", repr(b"".join(window)))
         # ic(window)
         # if there is a match, we know the whole window gets replaced
         if b"".join(window) == match_bytes:
