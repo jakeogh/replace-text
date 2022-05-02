@@ -147,7 +147,7 @@ def iterate_over_fh(
             # break
             assert (len(window) < len(match_bytes)) or (len(window) == len(match_bytes))
             _window = b"".join(window)
-            assert _window != match_bytes  # bug the last window may match
+            # assert _window != match_bytes  # bug the last window may match
             if output_fh:
                 output_fh.write(_window)
             break
