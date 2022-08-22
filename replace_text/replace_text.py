@@ -40,6 +40,7 @@ from clicktool import tv
 from enumerate_input import iterate_input
 from eprint import eprint
 from pathtool import get_file_size
+from unmp import unmp
 
 # note adding deps requires changes to sendgentoo
 
@@ -443,7 +444,6 @@ def replace_text_in_file(
 
 
 @click.command()
-@click.argument("paths", nargs=-1)
 @click.option(
     "--match",
     "match_str",
@@ -496,7 +496,6 @@ def replace_text_in_file(
 @click.pass_context
 def cli(
     ctx,
-    paths: tuple[str],
     match_str: str,
     replacement_str: str,
     match_file: str,
@@ -515,6 +514,14 @@ def cli(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+    )
+
+    iterator = unmp(
+        valid_types=[
+            bytes
+        ],
+        single_type=True,
+        verbose=verbose,
     )
 
     # ic(replacement)
@@ -576,17 +583,17 @@ def cli(
         write_mode = "wb"
         read_mode = "rb"
 
-    # if files:   # got files on command line, shouldnt be expeecting input on stdin
-    disable_stdin = False
-    if paths:
-        disable_stdin = True
+    ## if files:   # got files on command line, shouldnt be expeecting input on stdin
+    #disable_stdin = False
+    #if paths:
+    #    disable_stdin = True
 
-    if not paths:
-        stdout = True
+    #if not paths:
+    stdout = True
 
-    if paths and not replacement_bytes:
-        if not remove_match:
-            stdout = True
+    #if paths and not replacement_bytes:
+    #    if not remove_match:
+    #        stdout = True
 
     output_fh = None
     if stdout:
@@ -598,11 +605,8 @@ def cli(
     if replacement_bytes is None:
         output_fh = None  # just print match_count and file_name
 
-    input_file_iterator = None
-
     if verbose:
         ic(
-            paths,
             match_bytes,
             replacement_bytes,
             match_file,
@@ -613,57 +617,43 @@ def cli(
             ask_replacement,
         )
 
-    if paths:
-        input_file_iterator = iterate_input(
-            iterator=paths,
-            null=b"\0",
-            dont_decode=True,  #  must iterate over bytes for null terminated input
-            disable_stdin=disable_stdin,
-            skip=None,
-            head=None,
-            tail=None,
-            random=False,
-            loop=None,
-            input_filter_function=None,
-            verbose=verbose,
-        )
-        for path in input_file_iterator:
-            path = Path(os.fsdecode(path))
-            if verbose == inf:
-                ic(path)
+    for path in iterator:
+        path = Path(os.fsdecode(path))
+        if verbose == inf:
+            ic(path)
 
-            replace_text_in_file(
-                path=path,
-                match_bytes=match_bytes,
-                replacement_bytes=replacement_bytes,
-                output_fh=output_fh,
-                stdout=stdout,
-                read_mode=read_mode,
-                write_mode=write_mode,
-                remove_match=remove_match,
-                verbose=verbose,
-            )
-
-        return
-
-    else:  # reading input on stdin to match against
-        if utf8:
-            input_fh = sys.stdin
-        else:
-            input_fh = sys.stdin.buffer
-
-        match_count, modified = iterate_over_fh(
-            input_fh=input_fh,
+        replace_text_in_file(
+            path=path,
             match_bytes=match_bytes,
             replacement_bytes=replacement_bytes,
             output_fh=output_fh,
+            stdout=stdout,
+            read_mode=read_mode,
+            write_mode=write_mode,
+            remove_match=remove_match,
             verbose=verbose,
         )
 
-        if replacement_bytes is None:
-            if verbose:
-                ic(match_count, input_fh)
-            if match_count > 0:
-                print(match_count, input_fh)
+    return
 
-        return
+    #else:  # reading input on stdin to match against
+    #    if utf8:
+    #        input_fh = sys.stdin
+    #    else:
+    #        input_fh = sys.stdin.buffer
+
+    #    match_count, modified = iterate_over_fh(
+    #        input_fh=input_fh,
+    #        match_bytes=match_bytes,
+    #        replacement_bytes=replacement_bytes,
+    #        output_fh=output_fh,
+    #        verbose=verbose,
+    #    )
+
+    #    if replacement_bytes is None:
+    #        if verbose:
+    #            ic(match_count, input_fh)
+    #        if match_count > 0:
+    #            print(match_count, input_fh)
+
+    #    return
