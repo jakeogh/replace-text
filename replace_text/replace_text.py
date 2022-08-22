@@ -18,7 +18,7 @@
 # pylint: disable=R0903     # too few public methods
 # pylint: disable=E1101     # no member for base
 # pylint: disable=W0201     # attribute defined outside __init__
-
+from __future__ import annotations
 
 import os
 import shutil
@@ -27,20 +27,20 @@ import sys
 import tempfile
 from math import inf
 from pathlib import Path
-from typing import Optional
-from typing import Union
 
-# from icecream import ic  # too many deps
 import click
 from asserttool import ic
 from asserttool import maxone
 from clicktool import tv
-# from colorama import Fore
-# from colorama import Style
-from enumerate_input import iterate_input
 from eprint import eprint
+from mptool import output
 from pathtool import get_file_size
 from unmp import unmp
+
+# from colorama import Fore
+# from colorama import Style
+# from icecream import ic  # too many deps
+# from enumerate_input import iterate_input
 
 # note adding deps requires changes to sendgentoo
 
@@ -86,7 +86,7 @@ def all_files_iter(p):
 def append_unique_bytes_to_file(
     path: Path,
     bytes_to_append: bytes,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ) -> None:
 
     assert isinstance(bytes_to_append, bytes)
@@ -115,9 +115,9 @@ def iterate_over_fh(
     *,
     input_fh,
     match_bytes: bytes,
-    replacement_bytes: Optional[bytes],
+    replacement_bytes: None | bytes,
     output_fh,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ) -> tuple[int, bool]:
 
     assert isinstance(match_bytes, bytes)
@@ -214,7 +214,7 @@ def replace_text_line(
     match_bytes: str,
     replacement: str,
     temp_file,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
 
     match_count = 0
@@ -261,7 +261,7 @@ def replace_text_line(
 #                       match_bytes: bytes,
 #                       replacement: bytes,
 #                       temp_file,
-#                       verbose: Union[bool, int, float],
+#                       verbose: bool | int | float,
 #                       ):
 #
 #    #assert isinstance(path, Path)
@@ -291,7 +291,7 @@ def replace_text(
     match_bytes,
     replacement,
     temp_file,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
 
     if isinstance(match_bytes, bytes):
@@ -319,10 +319,10 @@ def get_thing(
     *,
     utf8: bool,
     prompt: str,
-    match_bytes: Optional[bytes],
-    match_file: Optional[str],
+    match_bytes: None | bytes,
+    match_file: None | str,
     ask: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ):
 
     result = None
@@ -371,12 +371,12 @@ def get_thing(
 def replace_text_in_file(
     path: Path,
     match_bytes: bytes,
-    replacement_bytes: Optional[bytes],
+    replacement_bytes: None | bytes,
     output_fh,
     read_mode: str,
     write_mode: str,
     remove_match: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
 ) -> None:
 
     path = Path(path).expanduser().resolve()
@@ -411,12 +411,12 @@ def replace_text_in_file(
 
     if verbose:
         ic(match_count, input_fh)
-    #if match_count > 0:
+    # if match_count > 0:
     #    sys.stderr.buffer.write(str(match_count).encode("utf8") + b" ")
     #    sys.stderr.buffer.write(str(input_fh.name).encode("utf8"))
     #    sys.stderr.buffer.write(b"\n")
 
-    #if not stdout:
+    # if not stdout:
     output_fh.close()
     output_fh_path = output_fh.name
     if verbose == inf:
@@ -438,7 +438,6 @@ def replace_text_in_file(
     else:
         os.unlink(output_fh_path)
     return
-
 
 
 @click.command()
@@ -499,7 +498,7 @@ def cli(
     match_file: str,
     replacement_file: str,
     remove_match: bool,
-    verbose: Union[bool, int, float],
+    verbose: bool | int | float,
     verbose_inf: bool,
     utf8: bool,
     stdout: bool,
@@ -515,9 +514,7 @@ def cli(
     )
 
     iterator = unmp(
-        valid_types=[
-            bytes
-        ],
+        valid_types=[bytes],
         single_type=True,
         verbose=verbose,
     )
@@ -605,8 +602,8 @@ def cli(
             ask_replacement,
         )
 
-    for path in iterator:
-        path = Path(os.fsdecode(path))
+    for _path in iterator:
+        path = Path(os.fsdecode(_path))
         if verbose == inf:
             ic(path)
 
@@ -620,10 +617,17 @@ def cli(
             remove_match=remove_match,
             verbose=verbose,
         )
+        output(
+            _path,
+            reason=None,
+            dict_output=False,
+            tty=tty,
+            verbose=verbose,
+        )
 
     return
 
-    #else:  # reading input on stdin to match against
+    # else:  # reading input on stdin to match against
     #    if utf8:
     #        input_fh = sys.stdin
     #    else:
