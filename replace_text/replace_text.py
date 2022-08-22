@@ -411,10 +411,10 @@ def replace_text_in_file(
 
     if verbose:
         ic(match_count, input_fh)
-    if match_count > 0:
-        sys.stderr.buffer.write(str(match_count).encode("utf8") + b" ")
-        sys.stderr.buffer.write(str(input_fh.name).encode("utf8"))
-        sys.stderr.buffer.write(b"\n")
+    #if match_count > 0:
+    #    sys.stderr.buffer.write(str(match_count).encode("utf8") + b" ")
+    #    sys.stderr.buffer.write(str(input_fh.name).encode("utf8"))
+    #    sys.stderr.buffer.write(b"\n")
 
     #if not stdout:
     output_fh.close()
