@@ -373,7 +373,6 @@ def replace_text_in_file(
     match_bytes: bytes,
     replacement_bytes: Optional[bytes],
     output_fh,
-    stdout: bool,
     read_mode: str,
     write_mode: str,
     remove_match: bool,
@@ -381,7 +380,6 @@ def replace_text_in_file(
 ) -> None:
 
     path = Path(path).expanduser().resolve()
-    assert isinstance(stdout, bool)
     assert isinstance(match_bytes, bytes)
     if replacement_bytes is not None:
         assert isinstance(replacement_bytes, bytes)
@@ -409,38 +407,38 @@ def replace_text_in_file(
         )
 
     if verbose == inf:
-        ic(stdout, match_count, output_fh)
+        ic(match_count, output_fh)
 
-    if not stdout:
-        output_fh.close()
-        output_fh_path = output_fh.name
-        if verbose == inf:
-            ic(output_fh_path)
-        if modified:
-            bytes_difference = len(replacement_bytes) - len(match_bytes)
-            bytes_difference = bytes_difference * match_count
-            if verbose == inf:
-                ic(bytes_difference)
-            input_file_size = get_file_size(path)
-            output_file_size = get_file_size(output_fh_path)
-            if verbose == inf:
-                ic(input_file_size)
-                ic(output_file_size)
-            assert (input_file_size + bytes_difference) == output_file_size
-            shutil.copystat(path, output_fh_path)
-            shutil.move(output_fh_path, path)
-            eprint(match_count, path.as_posix())
-        else:
-            os.unlink(output_fh_path)
-        return
-
-    # if replacement_bytes is None:
     if verbose:
         ic(match_count, input_fh)
     if match_count > 0:
-        sys.stdout.buffer.write(str(match_count).encode("utf8") + b" ")
-        sys.stdout.buffer.write(str(input_fh.name).encode("utf8"))
-        sys.stdout.buffer.write(b"\n")
+        sys.stderr.buffer.write(str(match_count).encode("utf8") + b" ")
+        sys.stderr.buffer.write(str(input_fh.name).encode("utf8"))
+        sys.stderr.buffer.write(b"\n")
+
+    #if not stdout:
+    output_fh.close()
+    output_fh_path = output_fh.name
+    if verbose == inf:
+        ic(output_fh_path)
+    if modified:
+        bytes_difference = len(replacement_bytes) - len(match_bytes)
+        bytes_difference = bytes_difference * match_count
+        if verbose == inf:
+            ic(bytes_difference)
+        input_file_size = get_file_size(path)
+        output_file_size = get_file_size(output_fh_path)
+        if verbose == inf:
+            ic(input_file_size)
+            ic(output_file_size)
+        assert (input_file_size + bytes_difference) == output_file_size
+        shutil.copystat(path, output_fh_path)
+        shutil.move(output_fh_path, path)
+        eprint(match_count, path.as_posix())
+    else:
+        os.unlink(output_fh_path)
+    return
+
 
 
 @click.command()
@@ -583,17 +581,7 @@ def cli(
         write_mode = "wb"
         read_mode = "rb"
 
-    ## if files:   # got files on command line, shouldnt be expeecting input on stdin
-    #disable_stdin = False
-    #if paths:
-    #    disable_stdin = True
-
-    #if not paths:
     stdout = True
-
-    #if paths and not replacement_bytes:
-    #    if not remove_match:
-    #        stdout = True
 
     output_fh = None
     if stdout:
@@ -627,7 +615,6 @@ def cli(
             match_bytes=match_bytes,
             replacement_bytes=replacement_bytes,
             output_fh=output_fh,
-            stdout=stdout,
             read_mode=read_mode,
             write_mode=write_mode,
             remove_match=remove_match,
