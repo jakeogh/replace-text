@@ -604,6 +604,9 @@ def cli(
 
     for _path in iterator:
         path = Path(os.fsdecode(_path))
+        if path.name == "byte_vector_replacer.py":
+            eprint("REFUSING TO EDIT byte_vector_replacer.py")
+            continue
         if verbose == inf:
             ic(path)
 
