@@ -11,7 +11,10 @@ from setuptools import setup
 if not sys.version_info[0] == 3:
     sys.exit("Sorry, Python 3 is required. Use: 'python3 setup.py install'")
 
-dependencies = ["pathtool @ git+https://git@github.com/jakeogh/pathtool"]
+dependencies = [
+    "pathtool @ git+https://git@github.com/jakeogh/pathtool",
+    "asserttool @ git+https://git@github.com/jakeogh/asserttool",
+]
 version = 0.01
 
 setup(
