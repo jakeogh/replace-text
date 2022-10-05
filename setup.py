@@ -15,6 +15,7 @@ dependencies = [
     "pathtool @ git+https://git@github.com/jakeogh/pathtool",
     "asserttool @ git+https://git@github.com/jakeogh/asserttool",
     "clicktool @ git+https://git@github.com/jakeogh/clicktool",
+    "mptool @ git+https://git@github.com/jakeogh/mptool",
 ]
 version = 0.01
 
