@@ -2,14 +2,9 @@
 """
 replace-text - Replace text in files(s) or stdin.
 """
-import re
-import sys
 
 from setuptools import find_packages
 from setuptools import setup
-
-if not sys.version_info[0] == 3:
-    sys.exit("Sorry, Python 3 is required. Use: 'python3 setup.py install'")
 
 dependencies = [
     "pathtool @ git+https://git@github.com/jakeogh/pathtool",
@@ -54,7 +49,6 @@ setup(
         "Operating System :: Unix",
         "Operating System :: Windows",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
