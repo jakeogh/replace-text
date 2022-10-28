@@ -39,7 +39,7 @@ from unmp import unmp
 
 # from colorama import Fore
 # from colorama import Style
-# from icecream import ic  # too many deps
+# from asserttool import ic  # too many deps
 # from enumerate_input import iterate_input
 
 # note adding deps requires changes to sendgentoo
@@ -563,9 +563,7 @@ def cli(
     if match_bytes[-1] == b"\n":
         if not replacement_bytes[-1] == b"\n":
             eprint(
-                "WARNING: match_bytes ends in {} but replacement_bytes does not".format(
-                    match_bytes[-1]
-                )
+                f"WARNING: match_bytes ends in {match_bytes[-1]} but replacement_bytes does not"
             )
             if not disable_newline_check:
                 eprint("use --disable-newline-check")
@@ -607,7 +605,7 @@ def cli(
         if path.name == "byte_vector_replacer.py":
             eprint("REFUSING TO EDIT byte_vector_replacer.py")
             continue
-        if verbose == inf:
+        if verbose:
             ic(path)
 
         replace_text_in_file(
