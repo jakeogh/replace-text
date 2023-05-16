@@ -37,8 +37,6 @@ from mptool import output
 from pathtool import get_file_size
 from unmp import unmp
 
-# from colorama import Fore
-# from colorama import Style
 # from asserttool import ic  # too many deps
 # from enumerate_input import iterate_input
 
@@ -86,9 +84,7 @@ def all_files_iter(p):
 def append_unique_bytes_to_file(
     path: Path,
     bytes_to_append: bytes,
-    verbose: bool | int | float,
 ) -> None:
-
     assert isinstance(bytes_to_append, bytes)
     match_count = None
     path = Path(path).expanduser()
@@ -98,13 +94,11 @@ def append_unique_bytes_to_file(
             match_bytes=bytes_to_append,
             replacement_bytes=None,
             output_fh=None,
-            verbose=verbose,
         )
 
         assert not modified
 
-    if verbose:
-        ic(path, match_count, modified)
+    ic(path, match_count, modified)
 
     if match_count == 0:
         with open(path, "ab") as input_fh:
@@ -117,9 +111,7 @@ def iterate_over_fh(
     match_bytes: bytes,
     replacement_bytes: None | bytes,
     output_fh,
-    verbose: bool | int | float,
 ) -> tuple[int, bool]:
-
     assert isinstance(match_bytes, bytes)
     if replacement_bytes is not None:
         assert isinstance(replacement_bytes, bytes)
@@ -131,20 +123,16 @@ def iterate_over_fh(
         match_bytes
     )  # need to expand a matching block by an arb amount, replacement_bytes can be any size
 
-    if verbose == inf:
-        ic(input_fh, output_fh)
+    ic(input_fh, output_fh)
 
     while True:
         # window starts off empty
-        if verbose == inf:
-            ic(len(match_bytes), len(window), location_read)
+        ic(len(match_bytes), len(window), location_read)
         # fh.seek(location_read)  # unecessary
         next_byte = input_fh.read(1)
-        if verbose == inf:
-            ic(next_byte)
+        ic(next_byte)
         if next_byte == b"":
-            if verbose == inf:
-                ic("done iterating, cant break here must write remaining window")
+            ic("done iterating, cant break here must write remaining window")
             # break
             assert (len(window) < len(match_bytes)) or (len(window) == len(match_bytes))
             _window = b"".join(window)
@@ -172,28 +160,25 @@ def iterate_over_fh(
 
         assert len(window) == len(match_bytes)
         # if it's possible to do a match, see if there is one
-        if verbose == inf:
-            print("\n")
-            eprint("match_bytes :", repr(match_bytes))
-            eprint("window:      ", repr(b"".join(window)))
+        # if verbose == inf:
+        #    eprint("\n")
+        #    eprint("match_bytes :", repr(match_bytes))
+        #    eprint("window:      ", repr(b"".join(window)))
         # ic(window)
         # if there is a match, we know the whole window gets replaced
         if b"".join(window) == match_bytes:
-            if verbose:
-                ic("matched")
+            ic("matched")
             match_count += 1
             if replacement_bytes is not None:
                 window = replacement_bytes
-                if verbose:
-                    ic(window)
+                ic(window)
                 modified = True
                 if output_fh:
                     output_fh.write(window)  # flush the replacement_bytes to disk
                 window = []  # start a new window, dont want to match on the replacement
             continue
         else:
-            if verbose == inf:
-                ic(len(window), "window was full, but didnt match")
+            ic(len(window), "window was full, but didnt match")
 
         # here the window was full, but it did not match,
         # so the window must be shifted by one byte, and the byte that fell off must be written
@@ -202,8 +187,7 @@ def iterate_over_fh(
         # assert len(window) in [len(match_bytes), len(match_bytes) + 1]
         assert len(window) == len(match_bytes)
 
-    if verbose == inf:
-        ic("broke", modified)
+    ic("broke", modified)
 
     return match_count, modified
 
@@ -214,13 +198,10 @@ def replace_text_line(
     match_bytes: str,
     replacement: str,
     temp_file,
-    verbose: bool | int | float,
 ):
-
     match_count = 0
     assert isinstance(path, Path)
-    if verbose:
-        eprint(path)
+    ic(path)
 
     # this cant handle binary files... or files with mixed newlines
     modified = False
@@ -261,7 +242,7 @@ def replace_text_line(
 #                       match_bytes: bytes,
 #                       replacement: bytes,
 #                       temp_file,
-#                       verbose: bool | int | float,
+#                       verbose: bool | int | float = False,
 #                       ):
 #
 #    #assert isinstance(path, Path)
@@ -291,9 +272,7 @@ def replace_text(
     match_bytes,
     replacement,
     temp_file,
-    verbose: bool | int | float,
 ):
-
     if isinstance(match_bytes, bytes):
         assert False
         # match_count, modified = \
@@ -301,7 +280,6 @@ def replace_text(
         #                       match_bytes=match,
         #                       replacement=replacement,
         #                       temp_file=temp_file,
-        #                       verbose=verbose,
         #                       )
     else:
         match_count, modified = replace_text_line(
@@ -309,7 +287,6 @@ def replace_text(
             match_bytes=match_bytes,
             replacement=replacement,
             temp_file=temp_file,
-            verbose=verbose,
         )
 
     return match_count, modified
@@ -322,9 +299,7 @@ def get_thing(
     match_bytes: None | bytes,
     match_file: None | str,
     ask: bool,
-    verbose: bool | int | float,
 ):
-
     result = None
     assert prompt in ["match", "replacement"]
     if not maxone([match_bytes, match_file, ask]):
@@ -356,16 +331,10 @@ def get_thing(
             result = match_bytes.encode("utf8")
 
     if result:
-        if verbose == inf:
-            ic(result)
+        ic(result)
         return result
 
-    raise ValueError("one of --{0} --{0}-file or --ask-{0} is required".format(prompt))
-
-
-#        recursive: bool,
-#        recursive_dotfiles: bool,
-#        endswith: str,
+    raise ValueError(f"one of --{prompt} --{prompt}-file or --ask-{prompt} is required")
 
 
 def replace_text_in_file(
@@ -376,9 +345,7 @@ def replace_text_in_file(
     read_mode: str,
     write_mode: str,
     remove_match: bool,
-    verbose: bool | int | float,
 ) -> None:
-
     path = Path(path).expanduser().resolve()
     assert isinstance(match_bytes, bytes)
     if replacement_bytes is not None:
@@ -403,14 +370,10 @@ def replace_text_in_file(
             match_bytes=match_bytes,
             replacement_bytes=replacement_bytes,
             output_fh=output_fh,
-            verbose=verbose,
         )
 
-    if verbose == inf:
-        ic(match_count, output_fh)
-
-    if verbose:
-        ic(match_count, input_fh)
+    ic(match_count, output_fh)
+    ic(match_count, input_fh)
     # if match_count > 0:
     #    sys.stderr.buffer.write(str(match_count).encode("utf8") + b" ")
     #    sys.stderr.buffer.write(str(input_fh.name).encode("utf8"))
@@ -419,18 +382,15 @@ def replace_text_in_file(
     # if not stdout:
     output_fh.close()
     output_fh_path = output_fh.name
-    if verbose == inf:
-        ic(output_fh_path)
+    ic(output_fh_path)
     if modified:
         bytes_difference = len(replacement_bytes) - len(match_bytes)
         bytes_difference = bytes_difference * match_count
-        if verbose == inf:
-            ic(bytes_difference)
+        ic(bytes_difference)
         input_file_size = get_file_size(path)
         output_file_size = get_file_size(output_fh_path)
-        if verbose == inf:
-            ic(input_file_size)
-            ic(output_file_size)
+        ic(input_file_size)
+        ic(output_file_size)
         assert (input_file_size + bytes_difference) == output_file_size
         shutil.copystat(path, output_fh_path)
         shutil.move(output_fh_path, path)
@@ -498,25 +458,25 @@ def cli(
     match_file: str,
     replacement_file: str,
     remove_match: bool,
-    verbose: bool | int | float,
     verbose_inf: bool,
     utf8: bool,
     stdout: bool,
     ask_match: bool,
     ask_replacement: bool,
     disable_newline_check: bool,
+    verbose: bool | int | float = False,
 ):
-
     tty, verbose = tv(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
     )
 
+    if not verbose:
+        ic.disable()
+
     iterator = unmp(
-        valid_types=[bytes],
-        single_type=True,
-        verbose=verbose,
+        valid_types=[dict, bytes],
     )
 
     # ic(replacement)
@@ -536,7 +496,6 @@ def cli(
         match_bytes=match_bytes,
         match_file=match_file,
         ask=ask_match,
-        verbose=verbose,
     )
 
     if replacement_bytes or replacement_file or ask_replacement:
@@ -550,15 +509,13 @@ def cli(
             match_bytes=replacement_bytes,
             match_file=replacement_file,
             ask=ask_replacement,
-            verbose=verbose,
         )
 
     if remove_match:
         assert replacement_bytes is None
         replacement_bytes = b""
 
-    if verbose == inf:
-        ic(match_bytes, replacement_bytes)
+    ic(match_bytes, replacement_bytes)
 
     if match_bytes[-1] == b"\n":
         if not replacement_bytes[-1] == b"\n":
@@ -588,25 +545,32 @@ def cli(
     if replacement_bytes is None:
         output_fh = None  # just print match_count and file_name
 
-    if verbose:
-        ic(
-            match_bytes,
-            replacement_bytes,
-            match_file,
-            replacement_file,
-            utf8,
-            stdout,
-            ask_match,
-            ask_replacement,
-        )
+    ic(
+        match_bytes,
+        replacement_bytes,
+        match_file,
+        replacement_file,
+        utf8,
+        stdout,
+        ask_match,
+        ask_replacement,
+    )
 
-    for _path in iterator:
-        path = Path(os.fsdecode(_path))
+    def _process_path(
+        *,
+        path: bytes,
+        match_bytes: bytes,
+        replacement_bytes: None | bytes,
+        output_fh,
+        read_mode,
+        write_mode,
+        remove_match,
+    ):
+        path = Path(os.fsdecode(path))
         if path.name == "byte_vector_replacer.py":
             eprint("REFUSING TO EDIT byte_vector_replacer.py")
-            continue
-        if verbose:
-            ic(path)
+            raise ValueError("REFUSING TO EDIT byte_vector_replacer.py")
+        ic(path)
 
         replace_text_in_file(
             path=path,
@@ -616,17 +580,36 @@ def cli(
             read_mode=read_mode,
             write_mode=write_mode,
             remove_match=remove_match,
-            verbose=verbose,
         )
         output(
             _path,
             reason=None,
             dict_output=False,
             tty=tty,
-            verbose=verbose,
         )
 
-    return
+    for _mpobject in iterator:
+        if isinstance(_mpobject, dict):
+            for _path in _mpobject.values():
+                _process_path(
+                    path=_path,
+                    match_bytes=match_bytes,
+                    replacement_bytes=replacement_bytes,
+                    output_fh=output_fh,
+                    read_mode=read_mode,
+                    write_mode=write_mode,
+                    remove_match=remove_match,
+                )
+        else:
+            _process_path(
+                path=_mpobject,
+                match_bytes=match_bytes,
+                replacement_bytes=replacement_bytes,
+                output_fh=output_fh,
+                read_mode=read_mode,
+                write_mode=write_mode,
+                remove_match=remove_match,
+            )
 
     # else:  # reading input on stdin to match against
     #    if utf8:
@@ -639,12 +622,10 @@ def cli(
     #        match_bytes=match_bytes,
     #        replacement_bytes=replacement_bytes,
     #        output_fh=output_fh,
-    #        verbose=verbose,
     #    )
 
     #    if replacement_bytes is None:
-    #        if verbose:
-    #            ic(match_count, input_fh)
+    #        ic(match_count, input_fh)
     #        if match_count > 0:
     #            print(match_count, input_fh)
 
