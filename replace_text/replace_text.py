@@ -25,10 +25,10 @@ import shutil
 import stat
 import sys
 import tempfile
-from math import inf
 from pathlib import Path
 
 import click
+from asserttool import gvd
 from asserttool import ic
 from asserttool import maxone
 from clicktool import tv
@@ -127,10 +127,12 @@ def iterate_over_fh(
 
     while True:
         # window starts off empty
-        ic(len(match_bytes), len(window), location_read)
+        if gvd:
+            ic(len(match_bytes), len(window), location_read)
         # fh.seek(location_read)  # unecessary
         next_byte = input_fh.read(1)
-        ic(next_byte)
+        if gvd:
+            ic(next_byte)
         if next_byte == b"":
             ic("done iterating, cant break here must write remaining window")
             # break
@@ -178,7 +180,8 @@ def iterate_over_fh(
                 window = []  # start a new window, dont want to match on the replacement
             continue
         else:
-            ic(len(window), "window was full, but didnt match")
+            if gvd:
+                ic(len(window), "window was full, but didnt match")
 
         # here the window was full, but it did not match,
         # so the window must be shifted by one byte, and the byte that fell off must be written
