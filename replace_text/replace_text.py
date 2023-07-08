@@ -569,14 +569,14 @@ def cli(
         write_mode,
         remove_match,
     ):
-        path = Path(os.fsdecode(path))
-        if path.name == "byte_vector_replacer.py":
+        _path = Path(os.fsdecode(path))
+        if _path.name == "byte_vector_replacer.py":
             eprint("REFUSING TO EDIT byte_vector_replacer.py")
             raise ValueError("REFUSING TO EDIT byte_vector_replacer.py")
-        ic(path)
+        ic(_path)
 
         replace_text_in_file(
-            path=path,
+            path=_path,
             match_bytes=match_bytes,
             replacement_bytes=replacement_bytes,
             output_fh=output_fh,
