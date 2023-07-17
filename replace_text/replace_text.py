@@ -38,7 +38,6 @@ from pathtool import get_file_size
 from unmp import unmp
 
 # from asserttool import ic  # too many deps
-# from enumerate_input import iterate_input
 
 # note adding deps requires changes to sendgentoo
 
