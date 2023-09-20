@@ -7,7 +7,6 @@ from setuptools import find_packages
 from setuptools import setup
 
 dependencies = [
-    "python3-typing-extensions",
     "pathtool @ git+https://git@github.com/jakeogh/pathtool",
     "asserttool @ git+https://git@github.com/jakeogh/asserttool",
     "clicktool @ git+https://git@github.com/jakeogh/clicktool",
