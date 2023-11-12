@@ -31,7 +31,9 @@ import click
 from asserttool import gvd
 from asserttool import ic
 from asserttool import maxone
-from clicktool import tv
+from clicktool import click_add_options
+from clicktool import click_global_options
+from clicktool import tvicgvd
 from eprint import eprint
 from mptool import output
 from pathtool import get_file_size
@@ -239,36 +241,6 @@ def replace_text_line(
         return match_count, modified
 
 
-# def replace_text_bytes(*,
-#                       fh,
-#                       match_bytes: bytes,
-#                       replacement: bytes,
-#                       temp_file,
-#                       verbose: bool | int | float = False,
-#                       ):
-#
-#    #assert isinstance(path, Path)
-#    #if verbose:
-#    #    ic(path)
-#
-#    assert isinstance(match_bytes, bytes)
-#    if replacement:
-#        assert isinstance(replacement, bytes)
-#
-#
-#    ## this cant handle binary files... or files with mixed newlines
-#    #if path.as_posix() == '/dev/stdin':
-#    #    fh = sys.stdin.buffer
-#    #    match_count, modified = iterate_over_fh(fh, match_bytes, replacement, temp_file, verbose)
-#    #else:
-#    #    with open(path, 'rb') as fh:
-#    #        match_count, modified = iterate_over_fh(fh, match_bytes, replacement, temp_file, verbose)
-#
-#    match_count, modified = iterate_over_fh(fh, match_bytes, replacement, temp_file, verbose)
-#
-#    return match_count, modified
-
-
 def replace_text(
     path: Path,
     match_bytes,
@@ -339,6 +311,7 @@ def get_thing(
     raise ValueError(f"one of --{prompt} --{prompt}-file or --ask-{prompt} is required")
 
 
+# called by byte-vector-replacer
 def replace_text_in_file(
     path: Path,
     match_bytes: bytes,
@@ -348,6 +321,8 @@ def replace_text_in_file(
     write_mode: str,
     remove_match: bool,
 ) -> None:
+    ic(match_bytes)
+    ic(replacement_bytes)
     path = Path(path).expanduser().resolve()
     assert isinstance(match_bytes, bytes)
     if replacement_bytes is not None:
@@ -403,55 +378,17 @@ def replace_text_in_file(
 
 
 @click.command()
-@click.option(
-    "--match",
-    "match_str",
-    type=str,
-)
-@click.option(
-    "--replacement",
-    "replacement_str",
-    type=str,
-)
+@click.option("--match", "match_str", type=str)
+@click.option("--replacement", "replacement_str", type=str)
 @click.option("--match-file", type=str)
-@click.option(
-    "--replacement-file",
-    type=str,
-)
-@click.option(
-    "--remove-match",
-    is_flag=True,
-)
-@click.option(
-    "--verbose",
-    count=True,
-)
-@click.option(
-    "--verbose-inf",
-    is_flag=True,
-)
-@click.option(
-    "--utf8",
-    is_flag=True,
-)
-@click.option(
-    "--stdout",
-    is_flag=True,
-)
-@click.option(
-    "--ask-match",
-    is_flag=True,
-    help="escape from shell escaping",
-)
-@click.option(
-    "--ask-replacement",
-    is_flag=True,
-    help="escape from shell escaping",
-)
-@click.option(
-    "--disable-newline-check",
-    is_flag=True,
-)
+@click.option("--replacement-file", type=str)
+@click.option("--remove-match", is_flag=True)
+@click.option("--utf8", is_flag=True)
+@click.option("--stdout", is_flag=True)
+@click.option("--ask-match", is_flag=True)
+@click.option("--ask-replacement", is_flag=True)
+@click.option("--disable-newline-check", is_flag=True)
+@click_add_options(click_global_options)
 @click.pass_context
 def cli(
     ctx,
@@ -460,22 +397,21 @@ def cli(
     match_file: str,
     replacement_file: str,
     remove_match: bool,
-    verbose_inf: bool,
     utf8: bool,
     stdout: bool,
     ask_match: bool,
     ask_replacement: bool,
     disable_newline_check: bool,
-    verbose: bool | int | float = False,
+    verbose_inf: bool,
+    verbose: bool = False,
 ):
-    tty, verbose = tv(
+    tty, verbose = tvicgvd(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
+        ic=ic,
+        gvd=gvd,
     )
-
-    if not verbose:
-        ic.disable()
 
     iterator = unmp(
         valid_types=[dict, bytes],
