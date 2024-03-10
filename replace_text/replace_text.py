@@ -402,6 +402,7 @@ def cli(
     ask_match: bool,
     ask_replacement: bool,
     disable_newline_check: bool,
+    dict_output: bool,
     verbose_inf: bool,
     verbose: bool = False,
 ):
