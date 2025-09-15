@@ -339,7 +339,10 @@ def replace_text_in_file(
     with open(path, read_mode) as input_fh:
         if replacement_bytes is not None:
             output_fh = tempfile.NamedTemporaryFile(
-                mode=write_mode, prefix="tmp-replace_text-", dir="/tmp", delete=False
+                mode=write_mode,
+                prefix="tmp-replace_text-",
+                dir="/tmp",
+                delete=False,
             )
 
         match_count, modified = iterate_over_fh(
@@ -392,10 +395,10 @@ def replace_text_in_file(
 @click.pass_context
 def cli(
     ctx,
-    match_str: str,
-    replacement_str: str,
-    match_file: str,
-    replacement_file: str,
+    match_str: None | str,
+    replacement_str: None | str,
+    match_file: None | str,
+    replacement_file: None | str,
     remove_match: bool,
     utf8: bool,
     stdout: bool,
@@ -455,6 +458,7 @@ def cli(
         replacement_bytes = b""
 
     ic(match_bytes, replacement_bytes)
+    assert match_bytes != replacement_bytes
 
     if match_bytes[-1] == b"\n":
         if not replacement_bytes[-1] == b"\n":
