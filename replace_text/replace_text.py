@@ -36,7 +36,6 @@ from clicktool import click_global_options
 from clicktool import tvicgvd
 from eprint import eprint
 from mptool import output
-from pathtool import get_file_size
 from unmp import unmp
 
 # from asserttool import ic  # too many deps
@@ -367,8 +366,8 @@ def replace_text_in_file(
         bytes_difference = len(replacement_bytes) - len(match_bytes)
         bytes_difference = bytes_difference * match_count
         ic(bytes_difference)
-        input_file_size = get_file_size(path)
-        output_file_size = get_file_size(output_fh_path)
+        input_file_size = os.path.getsize(path)
+        output_file_size = os.path.getsize(output_fh_path)
         ic(input_file_size)
         ic(output_file_size)
         assert (input_file_size + bytes_difference) == output_file_size
