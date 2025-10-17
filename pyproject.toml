@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "replace-text"
-version = 0.01
+version = "0.01"
 description = "Replace text in files(s) or stdin."
 authors = [
     { name = "jakeogh", email = "github.com@v6y.net" },
