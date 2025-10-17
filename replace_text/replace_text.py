@@ -114,7 +114,7 @@ def iterate_over_fh(
         # window starts off empty
         if gvd:
             ic(len(match_bytes), len(window), location_read)
-        # fh.seek(location_read)  # unecessary
+        # fh.seek(location_read)  # unnecessary
         next_byte = input_fh.read(1)
         if gvd:
             ic(next_byte)
@@ -146,23 +146,23 @@ def iterate_over_fh(
             assert len(window) == window_size  # only time window_size is used
 
         assert len(window) == len(match_bytes)
-        # if it's possible to do a match, see if there is one
-        # if verbose == inf:
-        #    eprint("\n")
-        #    eprint("match_bytes :", repr(match_bytes))
-        #    eprint("window:      ", repr(b"".join(window)))
-        # ic(window)
-        # if there is a match, we know the whole window gets replaced
         if b"".join(window) == match_bytes:
             ic("matched")
             match_count += 1
             if replacement_bytes is not None:
-                window = replacement_bytes
+                window = [replacement_bytes]
                 ic(window)
                 modified = True
                 if output_fh:
-                    output_fh.write(window)  # flush the replacement_bytes to disk
+                    output_fh.write(
+                        replacement_bytes
+                    )  # flush the replacement_bytes to disk
                 window = []  # start a new window, dont want to match on the replacement
+            else:
+                # No replacement, just counting matches - slide window by one
+                if output_fh:
+                    output_fh.write(window[0])
+                window = window[1:]
             continue
         else:
             if gvd:
@@ -338,12 +338,6 @@ def replace_text_in_file(
 
     ic(match_count, output_fh)
     ic(match_count, input_fh)
-    # if match_count > 0:
-    #    sys.stderr.buffer.write(str(match_count).encode("utf8") + b" ")
-    #    sys.stderr.buffer.write(str(input_fh.name).encode("utf8"))
-    #    sys.stderr.buffer.write(b"\n")
-
-    # if not stdout:
     output_fh.close()
     output_fh_path = output_fh.name
     ic(output_fh_path)
@@ -375,6 +369,13 @@ def replace_text_in_file(
 @click.option("--ask-match", is_flag=True)
 @click.option("--ask-replacement", is_flag=True)
 @click.option("--disable-newline-check", is_flag=True)
+@click.option(
+    "--path",
+    "path_args",
+    multiple=True,
+    type=click.Path(exists=True),
+    help="Path(s) to process directly instead of reading from stdin",
+)
 @click_add_options(click_global_options)
 @click.pass_context
 def cli(
@@ -389,6 +390,7 @@ def cli(
     ask_match: bool,
     ask_replacement: bool,
     disable_newline_check: bool,
+    path_args: tuple[str, ...],
     dict_output: bool,
     verbose_inf: bool,
     verbose: bool = False,
@@ -399,10 +401,6 @@ def cli(
         verbose_inf=verbose_inf,
         ic=ic,
         gvd=gvd,
-    )
-
-    iterator = unmp(
-        valid_types=[dict, bytes],
     )
 
     # ic(replacement)
@@ -444,10 +442,10 @@ def cli(
     ic(match_bytes, replacement_bytes)
     assert match_bytes != replacement_bytes
 
-    if match_bytes[-1] == b"\n":
-        if not replacement_bytes[-1] == b"\n":
+    if match_bytes and len(match_bytes) > 0 and match_bytes[-1:] == b"\n":
+        if replacement_bytes and (not replacement_bytes[-1:] == b"\n"):
             eprint(
-                f"WARNING: match_bytes ends in {match_bytes[-1]} but replacement_bytes does not"
+                f"WARNING: match_bytes ends in newline but replacement_bytes does not"
             )
             if not disable_newline_check:
                 eprint("use --disable-newline-check")
@@ -515,21 +513,12 @@ def cli(
             tty=tty,
         )
 
-    for _mpobject in iterator:
-        if isinstance(_mpobject, dict):
-            for _path in _mpobject.values():
-                _process_path(
-                    path=_path,
-                    match_bytes=match_bytes,
-                    replacement_bytes=replacement_bytes,
-                    output_fh=output_fh,
-                    read_mode=read_mode,
-                    write_mode=write_mode,
-                    remove_match=remove_match,
-                )
-        else:
+    # If --path option(s) provided, process those paths directly
+    if path_args:
+        for path_arg in path_args:
+            path_bytes = os.fsencode(path_arg)
             _process_path(
-                path=_mpobject,
+                path=path_bytes,
                 match_bytes=match_bytes,
                 replacement_bytes=replacement_bytes,
                 output_fh=output_fh,
@@ -537,23 +526,31 @@ def cli(
                 write_mode=write_mode,
                 remove_match=remove_match,
             )
+    else:
+        # Read messagepacked paths from stdin
+        iterator = unmp(
+            valid_types=[dict, bytes],
+        )
 
-    # else:  # reading input on stdin to match against
-    #    if utf8:
-    #        input_fh = sys.stdin
-    #    else:
-    #        input_fh = sys.stdin.buffer
-
-    #    match_count, modified = iterate_over_fh(
-    #        input_fh=input_fh,
-    #        match_bytes=match_bytes,
-    #        replacement_bytes=replacement_bytes,
-    #        output_fh=output_fh,
-    #    )
-
-    #    if replacement_bytes is None:
-    #        ic(match_count, input_fh)
-    #        if match_count > 0:
-    #            print(match_count, input_fh)
-
-    #    return
+        for _mpobject in iterator:
+            if isinstance(_mpobject, dict):
+                for _path in _mpobject.values():
+                    _process_path(
+                        path=_path,
+                        match_bytes=match_bytes,
+                        replacement_bytes=replacement_bytes,
+                        output_fh=output_fh,
+                        read_mode=read_mode,
+                        write_mode=write_mode,
+                        remove_match=remove_match,
+                    )
+            else:
+                _process_path(
+                    path=_mpobject,
+                    match_bytes=match_bytes,
+                    replacement_bytes=replacement_bytes,
+                    output_fh=output_fh,
+                    read_mode=read_mode,
+                    write_mode=write_mode,
+                    remove_match=remove_match,
+                )
