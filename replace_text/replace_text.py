@@ -507,7 +507,7 @@ def cli(
             remove_match=remove_match,
         )
         output(
-            _path,
+            os.fsencode(_path),
             reason=None,
             dict_output=False,
             tty=tty,
