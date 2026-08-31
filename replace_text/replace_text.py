@@ -10,6 +10,7 @@ import shutil
 import stat
 import sys
 import tempfile
+from collections.abc import Iterator
 from pathlib import Path
 
 import click
@@ -17,15 +18,18 @@ from asserttool import ic
 from asserttool import maxone
 from clicktool import click_add_options
 from clicktool import click_global_options
-from clicktool import tvicgvd
+from clicktool import tvic
 from eprint import eprint
-from globalverbose import gvd
-from mptool import output
-from unmp import unmp
 
 # from asserttool import ic  # too many deps
 
 # note adding deps requires changes to sendgentoo
+
+
+def _stdin_paths() -> Iterator[bytes]:
+    for line in sys.stdin.buffer.read().split(b"\n"):
+        if line:
+            yield line
 
 
 def remove_comments_from_bytes(
@@ -112,12 +116,8 @@ def iterate_over_fh(
 
     while True:
         # window starts off empty
-        if gvd:
-            ic(len(match_bytes), len(window), location_read)
         # fh.seek(location_read)  # unnecessary
         next_byte = input_fh.read(1)
-        if gvd:
-            ic(next_byte)
         if next_byte == b"":
             ic("done iterating, cant break here must write remaining window")
             # break
@@ -164,9 +164,6 @@ def iterate_over_fh(
                     output_fh.write(window[0])
                 window = window[1:]
             continue
-        else:
-            if gvd:
-                ic(len(window), "window was full, but didnt match")
 
         # here the window was full, but it did not match,
         # so the window must be shifted by one byte, and the byte that fell off must be written
@@ -395,12 +392,11 @@ def cli(
     verbose_inf: bool,
     verbose: bool = False,
 ):
-    tty, verbose = tvicgvd(
+    tty, verbose = tvic(
         ctx=ctx,
         verbose=verbose,
         verbose_inf=verbose_inf,
         ic=ic,
-        gvd=gvd,
     )
 
     # ic(replacement)
@@ -506,12 +502,8 @@ def cli(
             write_mode=write_mode,
             remove_match=remove_match,
         )
-        output(
-            os.fsencode(_path),
-            reason=None,
-            dict_output=False,
-            tty=tty,
-        )
+        sys.stdout.buffer.write(repr(os.fsencode(_path)).encode("utf8") + b"\n")
+        sys.stdout.buffer.flush()
 
     # If --path option(s) provided, process those paths directly
     if path_args:
@@ -527,30 +519,13 @@ def cli(
                 remove_match=remove_match,
             )
     else:
-        # Read messagepacked paths from stdin
-        iterator = unmp(
-            valid_types=[dict, bytes],
-        )
-
-        for _mpobject in iterator:
-            if isinstance(_mpobject, dict):
-                for _path in _mpobject.values():
-                    _process_path(
-                        path=_path,
-                        match_bytes=match_bytes,
-                        replacement_bytes=replacement_bytes,
-                        output_fh=output_fh,
-                        read_mode=read_mode,
-                        write_mode=write_mode,
-                        remove_match=remove_match,
-                    )
-            else:
-                _process_path(
-                    path=_mpobject,
-                    match_bytes=match_bytes,
-                    replacement_bytes=replacement_bytes,
-                    output_fh=output_fh,
-                    read_mode=read_mode,
-                    write_mode=write_mode,
-                    remove_match=remove_match,
-                )
+        for path_bytes in _stdin_paths():
+            _process_path(
+                path=path_bytes,
+                match_bytes=match_bytes,
+                replacement_bytes=replacement_bytes,
+                output_fh=output_fh,
+                read_mode=read_mode,
+                write_mode=write_mode,
+                remove_match=remove_match,
+            )

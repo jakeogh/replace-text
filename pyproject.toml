@@ -6,16 +6,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "replace-text"
-version = "0.01"
+version = "1!0.0.1788144237"
 description = "Replace text in files(s) or stdin."
 authors = [
     { name = "jakeogh", email = "github.com@v6y.net" },
 ]
 dependencies = [
-    "pathtool @ git+https://git@github.com/jakeogh/pathtool",
-    "asserttool @ git+https://git@github.com/jakeogh/asserttool",
-    "clicktool @ git+https://git@github.com/jakeogh/clicktool",
-    "mptool @ git+https://git@github.com/jakeogh/mptool",
+    "click",
+    "asserttool @ git+https://git@github.com/jakeogh/asserttool@4bd23a06c2161e488415acde89c29537e6720cc1",
+    "clicktool @ git+https://git@github.com/jakeogh/clicktool@4bc98af7590652693aef664af7485acde40688c2",
+    "eprint @ git+https://git@github.com/jakeogh/eprint@6ee1deca0c24b684eb5093247d6bd22e11f1b057",
 ]
 requires-python = ">=3.11"
 
